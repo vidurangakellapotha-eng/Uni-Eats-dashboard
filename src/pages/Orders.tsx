@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, Wifi, WifiOff } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, Wifi, WifiOff, User } from 'lucide-react';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import styles from './Orders.module.css';
 
+// Matches exactly how Uni Eats app stores orders in Firestore
+interface OrderItem {
+    menuItemId: string;
+    name: string;
+    quantity: number;
+    price: number;
+}
+
 interface Order {
     id: string;
-    items: { name: string; quantity: number }[];
-    status: 'pending' | 'preparing' | 'ready' | 'picked_up' | 'cancelled';
-    timestamp: any;
+    userId: string;
+    userName: string;
+    userType: string;
+    items: OrderItem[];
     total: number;
-    userId?: string;
-    userEmail?: string;
+    status: 'PLACED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'REJECTED';
+    paymentMethod: string;
+    timestamp: string;
+    createdAt: any; // Firestore serverTimestamp
 }
 
 export default function Orders() {
@@ -24,8 +35,8 @@ export default function Orders() {
 
     useEffect(() => {
         setLoading(true);
-        // Try common Firestore collection names used in Uni Eats apps
-        const q = query(collection(db, 'orders'), orderBy('timestamp', 'desc'));
+        // Uses 'createdAt' — matches Uni Eats app's addDoc field
+        const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
 
         const unsubscribe = onSnapshot(q,
             (snapshot) => {
@@ -47,6 +58,7 @@ export default function Orders() {
         return () => unsubscribe();
     }, []);
 
+    // Update order status using Uni Eats OrderStatus enum values
     const updateStatus = async (id: string, newStatus: Order['status']) => {
         try {
             await updateDoc(doc(db, 'orders', id), { status: newStatus });
@@ -55,15 +67,15 @@ export default function Orders() {
         }
     };
 
-    const deleteOrder = async (id: string) => {
+    const rejectOrder = async (id: string) => {
         try {
-            await updateDoc(doc(db, 'orders', id), { status: 'cancelled' });
+            await updateDoc(doc(db, 'orders', id), { status: 'REJECTED' });
         } catch (err) {
-            console.error('Failed to cancel order:', err);
+            console.error('Failed to reject order:', err);
         }
     };
 
-    const removeFromView = async (id: string) => {
+    const removeOrder = async (id: string) => {
         try {
             await deleteDoc(doc(db, 'orders', id));
         } catch (err) {
@@ -73,28 +85,41 @@ export default function Orders() {
 
     const getStatusClass = (status: Order['status']) => {
         switch (status) {
-            case 'pending': return styles.statusPending;
-            case 'preparing': return styles.statusPreparing;
-            case 'ready': return styles.statusReady;
-            case 'picked_up': return styles.statusPickedUp;
-            case 'cancelled': return styles.statusPending;
+            case 'PLACED': return styles.statusPending;
+            case 'PREPARING': return styles.statusPreparing;
+            case 'READY': return styles.statusReady;
+            case 'COMPLETED': return styles.statusPickedUp;
+            case 'REJECTED': return styles.statusRejected;
             default: return '';
         }
     };
 
-    const getTimestamp = (ts: any): Date => {
-        if (!ts) return new Date();
-        if (ts.toDate) return ts.toDate(); // Firestore Timestamp
-        if (ts.seconds) return new Date(ts.seconds * 1000);
-        return new Date(ts);
+    const getStatusLabel = (status: Order['status']) => {
+        switch (status) {
+            case 'PLACED': return 'NEW ORDER';
+            case 'PREPARING': return 'PREPARING';
+            case 'READY': return 'READY';
+            case 'COMPLETED': return 'COMPLETED';
+            case 'REJECTED': return 'CANCELLED';
+            default: return status;
+        }
+    };
+
+    const getTimestamp = (order: Order): string => {
+        if (order.createdAt?.toDate) {
+            return order.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        return order.timestamp || '—';
     };
 
     const filteredOrders = orders.filter(o => {
-        if (activeTab === 'History') return o.status === 'picked_up' || o.status === 'cancelled';
+        if (activeTab === 'History') return o.status === 'COMPLETED' || o.status === 'REJECTED';
         if (activeTab === 'Active') {
-            if (o.status === 'picked_up' || o.status === 'cancelled') return false;
+            if (o.status === 'COMPLETED' || o.status === 'REJECTED') return false;
             if (activeFilter === 'All Orders') return true;
-            return o.status === activeFilter.toLowerCase();
+            if (activeFilter === 'Pending') return o.status === 'PLACED';
+            if (activeFilter === 'Preparing') return o.status === 'PREPARING';
+            if (activeFilter === 'Ready') return o.status === 'READY';
         }
         return true;
     });
@@ -167,67 +192,71 @@ export default function Orders() {
                                     style={{ minHeight: '280px', display: 'flex', flexDirection: 'column' }}
                                 >
                                     <div className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
-                                        {order.status.replace('_', ' ').toUpperCase()}
+                                        {getStatusLabel(order.status)}
                                     </div>
 
                                     <div className={styles.orderHeader}>
                                         <div className={styles.orderId}>#{order.id.slice(-6).toUpperCase()}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
                                             <Clock size={12} />
-                                            {getTimestamp(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {getTimestamp(order)}
                                             <span>•</span>
                                             <span style={{ fontWeight: '600', color: 'hsl(var(--primary))' }}>
-                                                Rs. {order.total?.toLocaleString() ?? '—'}
+                                                LKR {order.total?.toLocaleString() ?? '—'}
                                             </span>
                                         </div>
-                                        {order.userEmail && (
-                                            <div style={{ fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
-                                                {order.userEmail}
-                                            </div>
-                                        )}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
+                                            <User size={11} />
+                                            {order.userName || 'Unknown'} • {order.paymentMethod || '—'}
+                                        </div>
                                     </div>
 
                                     <div className={styles.itemsList} style={{ flex: 1 }}>
                                         {(order.items || []).map((item, idx) => (
                                             <div key={idx} className={styles.item} style={{ padding: '0.5rem 0', borderBottom: '1px solid hsl(var(--border))' }}>
-                                                <span style={{ color: 'hsl(var(--foreground))', fontWeight: '500' }}>{item.quantity}x {item.name}</span>
+                                                <span style={{ color: 'hsl(var(--foreground))', fontWeight: '500' }}>
+                                                    {item.quantity}x {item.name}
+                                                </span>
+                                                <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.75rem' }}>
+                                                    LKR {(item.price * item.quantity).toLocaleString()}
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
 
                                     <div className={styles.actions} style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem' }}>
-                                        {order.status === 'pending' && (
+                                        {order.status === 'PLACED' && (
                                             <>
-                                                <button onClick={() => updateStatus(order.id, 'preparing')} className="btn btn-primary" style={{ flex: 1, gap: '0.5rem' }}>
+                                                <button onClick={() => updateStatus(order.id, 'PREPARING')} className="btn btn-primary" style={{ flex: 1, gap: '0.5rem' }}>
                                                     <CookingPot size={18} /> Start Preparing
                                                 </button>
-                                                <button onClick={() => deleteOrder(order.id)} className="btn btn-secondary" style={{ padding: '0.75rem', color: 'hsl(var(--destructive))' }} title="Cancel Order">
+                                                <button onClick={() => rejectOrder(order.id)} className="btn btn-secondary" style={{ padding: '0.75rem', color: 'hsl(var(--destructive))' }} title="Reject Order">
                                                     <XCircle size={20} />
                                                 </button>
                                             </>
                                         )}
-                                        {order.status === 'preparing' && (
+                                        {order.status === 'PREPARING' && (
                                             <>
-                                                <button onClick={() => updateStatus(order.id, 'ready')} className="btn btn-primary" style={{ flex: 1, gap: '0.5rem', background: '#10B981' }}>
+                                                <button onClick={() => updateStatus(order.id, 'READY')} className="btn btn-primary" style={{ flex: 1, gap: '0.5rem', background: '#10B981' }}>
                                                     <CheckCircle size={18} /> Mark Ready
                                                 </button>
-                                                <button onClick={() => deleteOrder(order.id)} className="btn btn-secondary" style={{ padding: '0.75rem', color: 'hsl(var(--destructive))' }} title="Cancel Order">
+                                                <button onClick={() => rejectOrder(order.id)} className="btn btn-secondary" style={{ padding: '0.75rem', color: 'hsl(var(--destructive))' }} title="Cancel Order">
                                                     <XCircle size={20} />
                                                 </button>
                                             </>
                                         )}
-                                        {order.status === 'ready' && (
+                                        {order.status === 'READY' && (
                                             <>
-                                                <button onClick={() => updateStatus(order.id, 'picked_up')} className="btn btn-primary" style={{ flex: 1, gap: '0.5rem' }}>
-                                                    <PackageCheck size={18} /> Complete Process
+                                                <button onClick={() => updateStatus(order.id, 'COMPLETED')} className="btn btn-primary" style={{ flex: 1, gap: '0.5rem' }}>
+                                                    <PackageCheck size={18} /> Complete Order
                                                 </button>
-                                                <button onClick={() => deleteOrder(order.id)} className="btn btn-secondary" style={{ padding: '0.75rem', color: 'hsl(var(--destructive))' }} title="Cancel Order">
+                                                <button onClick={() => rejectOrder(order.id)} className="btn btn-secondary" style={{ padding: '0.75rem', color: 'hsl(var(--destructive))' }} title="Cancel Order">
                                                     <XCircle size={20} />
                                                 </button>
                                             </>
                                         )}
-                                        {(order.status === 'picked_up' || order.status === 'cancelled') && (
-                                            <button onClick={() => removeFromView(order.id)} className="btn btn-secondary" style={{ flex: 1, gap: '0.5rem' }}>
+                                        {(order.status === 'COMPLETED' || order.status === 'REJECTED') && (
+                                            <button onClick={() => removeOrder(order.id)} className="btn btn-secondary" style={{ flex: 1, gap: '0.5rem' }}>
                                                 <Trash2 size={18} /> Remove
                                             </button>
                                         )}
@@ -235,11 +264,20 @@ export default function Orders() {
                                 </motion.div>
                             ))
                         ) : (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', color: 'hsl(var(--muted-foreground))' }}>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <PackageCheck size={48} strokeWidth={1} style={{ opacity: 0.5 }} />
-                                </div>
-                                <p>No {activeTab.toLowerCase()} orders matching this filter.</p>
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 2rem', color: 'hsl(var(--muted-foreground))' }}>
+                                <PackageCheck size={48} strokeWidth={1} style={{ opacity: 0.4, marginBottom: '1rem' }} />
+                                {orders.length === 0 ? (
+                                    <>
+                                        <p style={{ fontWeight: '600', color: 'hsl(var(--foreground))', marginBottom: '0.5rem' }}>
+                                            Waiting for orders from Uni Eats app...
+                                        </p>
+                                        <p style={{ fontSize: '0.8rem', maxWidth: '400px', margin: '0 auto', lineHeight: '1.6' }}>
+                                            When a student places an order in the Uni Eats app, it will appear here instantly with live updates.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <p>No {activeTab.toLowerCase()} orders matching this filter.</p>
+                                )}
                             </div>
                         )}
                     </AnimatePresence>

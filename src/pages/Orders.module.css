@@ -52,6 +52,12 @@
     border-color: hsla(142, 71%, 45%, 0.2);
 }
 
+.statusRejected {
+    background: hsla(0, 84%, 60%, 0.1);
+    color: hsl(0, 84%, 50%);
+    border-color: hsla(0, 84%, 60%, 0.2);
+}
+
 .statusPickedUp {
     background: hsla(25, 30%, 20%, 0.1);
     color: hsl(25, 30%, 20%);

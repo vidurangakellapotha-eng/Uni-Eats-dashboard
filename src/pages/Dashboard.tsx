@@ -13,17 +13,17 @@ export default function Dashboard() {
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'orders'), (snapshot) => {
             const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
-            const pending = all.filter(o => o.status === 'pending').length;
-            const preparing = all.filter(o => o.status === 'preparing').length;
-            const ready = all.filter(o => o.status === 'ready').length;
+            const pending = all.filter(o => o.status === 'PLACED').length;
+            const preparing = all.filter(o => o.status === 'PREPARING').length;
+            const ready = all.filter(o => o.status === 'READY').length;
             const total = all.length;
             setCounts({ pending, preparing, ready, total });
             // Recent 3 active orders sorted by timestamp descending
             const recent = all
-                .filter(o => o.status !== 'picked_up' && o.status !== 'cancelled')
+                .filter(o => o.status !== 'COMPLETED' && o.status !== 'REJECTED')
                 .sort((a, b) => {
-                    const ta = a.timestamp?.seconds ?? 0;
-                    const tb = b.timestamp?.seconds ?? 0;
+                    const ta = a.createdAt?.seconds ?? 0;
+                    const tb = b.createdAt?.seconds ?? 0;
                     return tb - ta;
                 })
                 .slice(0, 3);
@@ -42,9 +42,10 @@ export default function Dashboard() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'pending': return { bg: 'hsla(45, 93%, 47%, 0.1)', color: 'hsl(45, 93%, 35%)' };
-            case 'preparing': return { bg: 'hsla(25, 95%, 45%, 0.1)', color: 'hsl(25, 95%, 40%)' };
-            case 'ready': return { bg: 'hsla(142, 71%, 45%, 0.1)', color: 'hsl(142, 71%, 38%)' };
+            case 'PLACED': return { bg: 'hsla(45, 93%, 47%, 0.1)', color: 'hsl(45, 93%, 35%)' };
+            case 'PREPARING': return { bg: 'hsla(25, 95%, 45%, 0.1)', color: 'hsl(25, 95%, 40%)' };
+            case 'READY': return { bg: 'hsla(142, 71%, 45%, 0.1)', color: 'hsl(142, 71%, 38%)' };
+            case 'REJECTED': return { bg: 'hsla(0, 84%, 60%, 0.1)', color: 'hsl(0, 84%, 50%)' };
             default: return { bg: 'hsla(0,0%,50%,0.1)', color: 'hsl(0,0%,40%)' };
         }
     };
@@ -105,7 +106,7 @@ export default function Dashboard() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {recentOrders.map((order) => {
                             const { bg, color } = getStatusColor(order.status);
-                            const ts = order.timestamp?.toDate ? order.timestamp.toDate() : new Date();
+                            const ts = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
                             return (
                                 <div key={order.id} style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',

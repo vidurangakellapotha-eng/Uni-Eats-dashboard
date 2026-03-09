@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import {
     signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
     signOut,
     onAuthStateChanged,
     type User
@@ -11,12 +13,14 @@ interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
+    loginWithGoogle: () => Promise<void>;
     logout: () => Promise<void>;
     loading: boolean;
     error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+const googleProvider = new GoogleAuthProvider();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -48,6 +52,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const loginWithGoogle = async () => {
+        setError(null);
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (err: any) {
+            if (err.code !== 'auth/popup-closed-by-user') {
+                setError('Google sign-in failed. Please try again.');
+            }
+            throw err;
+        }
+    };
+
     const logout = async () => {
         await signOut(auth);
     };
@@ -57,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user,
             isAuthenticated: !!user,
             login,
+            loginWithGoogle,
             logout,
             loading,
             error
