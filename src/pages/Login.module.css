@@ -1,0 +1,115 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+    position: relative;
+    overflow: hidden;
+}
+
+.orb1 {
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, hsla(25, 60%, 50%, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(80px);
+    z-index: 0;
+}
+
+.orb2 {
+    position: absolute;
+    bottom: -20%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, hsla(30, 40%, 60%, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(80px);
+    z-index: 0;
+}
+
+.card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(84, 42, 21, 0.1);
+    position: relative;
+    z-index: 10;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    /* Brownish Gradient */
+    background: linear-gradient(to right, hsl(25, 95%, 45%), hsl(35, 92%, 40%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.subtitle {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.95rem;
+}
+
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+    margin-bottom: 0.5rem;
+}
+
+.inputField {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    color: hsl(var(--foreground));
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 2px hsla(25, 95%, 45%, 0.1);
+}
+
+.submitBtn {
+    width: 100%;
+    padding: 0.875rem;
+    /* Brown Gradient */
+    background: linear-gradient(135deg, hsl(25, 95%, 45%) 0%, hsl(35, 92%, 40%) 100%);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(84, 42, 21, 0.2);
+    transition: transform 0.1s;
+}
+
+.submitBtn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}

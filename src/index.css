@@ -1,0 +1,152 @@
+:root {
+  /* Uni-Eats Theme (Light Mode: White & Brown) */
+  --background: 0 0% 100%;
+  /* White */
+  --foreground: 20 14.3% 4.1%;
+  /* Dark text */
+
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+
+  --primary: 25 95% 45%;
+  /* Deep Brownish Orange */
+  --primary-foreground: 60 9.1% 97.8%;
+
+  --secondary: 25 30% 95%;
+  /* Light Brown / Beige */
+  --secondary-foreground: 25 30% 20%;
+
+  --muted: 25 30% 95%;
+  --muted-foreground: 25 10% 40%;
+
+  --accent: 25 30% 95%;
+  --accent-foreground: 25 30% 20%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+
+  --border: 25 20% 90%;
+  --input: 25 20% 90%;
+  --ring: 25 95% 45%;
+
+  --radius: 1rem;
+
+  /* Glassmorphism for Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(39, 21, 10, 0.1);
+  /* Brownish border tint */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Utility Classes */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  padding: 0.75rem 1.5rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+  background-color: hsl(var(--muted-foreground));
+  color: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, hsl(25, 95%, 45%), hsl(35, 92%, 40%));
+  /* Brown gradient */
+  color: white;
+}
+
+.btn-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border: 1px solid var(--border);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background-color: hsl(var(--muted));
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsla(25, 95%, 45%, 0.1);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
