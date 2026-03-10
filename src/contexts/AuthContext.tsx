@@ -7,11 +7,13 @@ import {
     onAuthStateChanged,
     type User
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
+    isAdmin: boolean;
     login: (email: string, password: string) => Promise<void>;
     loginWithGoogle: () => Promise<void>;
     logout: () => Promise<void>;
@@ -22,14 +24,44 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 const googleProvider = new GoogleAuthProvider();
 
+// Check if a user is an admin in Firestore
+async function checkAdminRole(user: User): Promise<boolean> {
+    try {
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        if (adminDoc.exists()) return true;
+
+        // First-ever login: auto-grant admin to your specific account
+        // Remove this block after you've set up your admin account
+        const OWNER_EMAIL = 'vidurangakellapotha@gmail.com';
+        if (user.email === OWNER_EMAIL) {
+            await setDoc(doc(db, 'admins', user.uid), {
+                email: user.email,
+                name: user.displayName || 'Admin',
+                grantedAt: new Date().toISOString()
+            });
+            return true;
+        }
+        return false;
+    } catch {
+        return false;
+    }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
+            if (firebaseUser) {
+                const adminStatus = await checkAdminRole(firebaseUser);
+                setIsAdmin(adminStatus);
+            } else {
+                setIsAdmin(false);
+            }
             setLoading(false);
         });
         return () => unsubscribe();
@@ -66,12 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = async () => {
         await signOut(auth);
+        setIsAdmin(false);
     };
 
     return (
         <AuthContext.Provider value={{
             user,
             isAuthenticated: !!user,
+            isAdmin,
             login,
             loginWithGoogle,
             logout,
