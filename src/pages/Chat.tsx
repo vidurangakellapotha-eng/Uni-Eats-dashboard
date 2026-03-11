@@ -95,14 +95,29 @@ const Chat: React.FC = () => {
         setInputText('');
 
         try {
+            // 1. Send the message to the chat history
             await addDoc(collection(db, 'supportMessages'), {
                 chatId: selectedChatId,
                 text,
                 senderId: 'admin',
                 senderName: 'Uni Eats Admin',
                 isAdmin: true,
+                createdAt: serverTimestamp(),
+                read: false
+            });
+
+            // 2. Also push a system notification to the student so they see a badge/toast
+            await addDoc(collection(db, 'notifications'), {
+                userId: selectedChatId,
+                title: '🎧 Support Reply',
+                message: text.length > 50 ? `${text.substring(0, 50)}...` : text,
+                type: 'chat',
+                icon: 'support_agent',
+                color: '#6366F1',
+                read: false,
                 createdAt: serverTimestamp()
             });
+
         } catch (err) {
             console.error("Error sending message:", err);
         }
