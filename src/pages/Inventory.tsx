@@ -15,6 +15,7 @@ interface MenuItem {
     image: string;
     rating: number;
     reviewCount: number;
+    prepTime?: number; // minutes
 }
 
 const categories = ['All', 'Breakfast', 'Lunch', 'Drinks', 'Savoury', 'Sweet'];
@@ -26,7 +27,7 @@ export default function Inventory() {
     const [activeCategory, setActiveCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [editItem, setEditItem] = useState<MenuItem | null>(null);
-    const [editForm, setEditForm] = useState({ name: '', price: '', category: '', description: '' });
+    const [editForm, setEditForm] = useState({ name: '', price: '', category: '', description: '', prepTime: '' });
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -56,7 +57,8 @@ export default function Inventory() {
             name: item.name,
             price: String(item.price),
             category: item.category,
-            description: item.description || ''
+            description: item.description || '',
+            prepTime: item.prepTime !== undefined ? String(item.prepTime) : ''
         });
         setSaveSuccess(false);
     };
@@ -71,13 +73,15 @@ export default function Inventory() {
         const priceVal = parseFloat(editForm.price);
         if (isNaN(priceVal) || priceVal < 0) return;
 
+        const prepTimeVal = editForm.prepTime !== '' ? parseInt(editForm.prepTime, 10) : null;
         setSaving(true);
         try {
             await updateDoc(doc(db, 'menu', editItem.id), {
                 name: editForm.name.trim(),
                 price: priceVal,
                 category: editForm.category,
-                description: editForm.description.trim()
+                description: editForm.description.trim(),
+                ...(prepTimeVal !== null && !isNaN(prepTimeVal) ? { prepTime: prepTimeVal } : {})
             });
             setSaveSuccess(true);
             setTimeout(() => closeEdit(), 1000);
@@ -160,6 +164,7 @@ export default function Inventory() {
                                 <th className={styles.th}>Item</th>
                                 <th className={styles.th}>Category</th>
                                 <th className={styles.th}>Price</th>
+                                <th className={styles.th}>Prep Time</th>
                                 <th className={styles.th}>Rating</th>
                                 <th className={styles.th} style={{ textAlign: 'center' }}>Available</th>
                                 <th className={styles.th} style={{ textAlign: 'center' }}>Edit</th>
@@ -204,6 +209,15 @@ export default function Inventory() {
                                         </td>
                                         <td className={styles.td} style={{ fontWeight: '700', color: 'hsl(var(--primary))' }}>
                                             Rs. {item.price}
+                                        </td>
+                                        <td className={styles.td}>
+                                            {item.prepTime !== undefined ? (
+                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: '600', color: 'hsl(var(--foreground))' }}>
+                                                    ⏱ {item.prepTime} min
+                                                </span>
+                                            ) : (
+                                                <span style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.8rem' }}>—</span>
+                                            )}
                                         </td>
                                         <td className={styles.td}>
                                             <span style={{ color: '#F59E0B', fontWeight: '600' }}>★ {item.rating}</span>
@@ -387,6 +401,52 @@ export default function Inventory() {
                                         onFocus={e => e.target.style.borderColor = 'hsl(var(--primary))'}
                                         onBlur={e => e.target.style.borderColor = 'hsl(var(--border))'}
                                     />
+                                </div>
+
+                                {/* Prep Time */}
+                                <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        ⏱ Prep Time (minutes)
+                                    </label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="120"
+                                            step="1"
+                                            placeholder="e.g. 10"
+                                            value={editForm.prepTime}
+                                            onChange={e => setEditForm(f => ({ ...f, prepTime: e.target.value }))}
+                                            style={{
+                                                width: '120px', padding: '0.75rem 1rem', borderRadius: '0.75rem',
+                                                border: '1.5px solid hsl(var(--border))', background: 'hsl(var(--background))',
+                                                color: 'hsl(var(--foreground))', fontSize: '1rem', fontWeight: '700',
+                                                outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
+                                                textAlign: 'center'
+                                            }}
+                                            onFocus={e => e.target.style.borderColor = 'hsl(var(--primary))'}
+                                            onBlur={e => e.target.style.borderColor = 'hsl(var(--border))'}
+                                        />
+                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                            {[5, 10, 15, 20, 30].map(mins => (
+                                                <button
+                                                    key={mins}
+                                                    type="button"
+                                                    onClick={() => setEditForm(f => ({ ...f, prepTime: String(mins) }))}
+                                                    style={{
+                                                        padding: '0.4rem 0.75rem', borderRadius: '0.5rem', cursor: 'pointer',
+                                                        border: '1px solid', fontSize: '0.8rem', fontWeight: '600',
+                                                        borderColor: editForm.prepTime === String(mins) ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                                                        background: editForm.prepTime === String(mins) ? 'hsla(25,95%,45%,0.1)' : 'hsl(var(--background))',
+                                                        color: editForm.prepTime === String(mins) ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+                                                        transition: 'all 0.15s'
+                                                    }}
+                                                >
+                                                    {mins}m
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
