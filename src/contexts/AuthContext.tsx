@@ -70,7 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (email: string, password: string) => {
         setError(null);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const adminStatus = await checkAdminRole(userCredential.user);
+            if (!adminStatus) {
+                await signOut(auth);
+                setError('Access Denied: This account is not registered as an Admin/Employee.');
+                throw new Error('NOT_ADMIN');
+            }
         } catch (err: any) {
             const code = err.code as string;
             if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
@@ -87,7 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loginWithGoogle = async () => {
         setError(null);
         try {
-            await signInWithPopup(auth, googleProvider);
+            const userCredential = await signInWithPopup(auth, googleProvider);
+            const adminStatus = await checkAdminRole(userCredential.user);
+            if (!adminStatus) {
+                await signOut(auth);
+                setError('Access Denied: You do not have admin permissions.');
+                throw new Error('NOT_ADMIN');
+            }
         } catch (err: any) {
             if (err.code !== 'auth/popup-closed-by-user') {
                 setError('Google sign-in failed. Please try again.');
