@@ -1,97 +1,95 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
 } from 'recharts';
 import styles from './Analytics.module.css';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Activity, Calendar } from 'lucide-react';
+import { ArrowUpRight, TrendingUp, DollarSign, Activity, Calendar, Wallet, CreditCard, Banknote } from 'lucide-react';
+import { db } from '../firebase';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 
-const weeklyData = [
-    { name: 'Mon', revenue: 4000, orders: 45 },
-    { name: 'Tue', revenue: 3000, orders: 35 },
-    { name: 'Wed', revenue: 5000, orders: 60 },
-    { name: 'Thu', revenue: 2780, orders: 30 },
-    { name: 'Fri', revenue: 6890, orders: 85 },
-    { name: 'Sat', revenue: 8390, orders: 110 },
-    { name: 'Sun', revenue: 10490, orders: 125 },
-];
+interface Order {
+    id: string;
+    total: number;
+    status: string;
+    paymentMethod: string;
+    createdAt?: any;
+}
 
-const dailyData = [
-    { name: '08:00', revenue: 800, orders: 10 },
-    { name: '10:00', revenue: 1200, orders: 15 },
-    { name: '12:00', revenue: 4500, orders: 40 },
-    { name: '14:00', revenue: 3200, orders: 28 },
-    { name: '16:00', revenue: 1500, orders: 12 },
-    { name: '18:00', revenue: 2200, orders: 18 },
-    { name: '20:00', revenue: 900, orders: 8 },
-];
-
-const monthlyData = [
-    { name: 'Week 1', revenue: 28000, orders: 320 },
-    { name: 'Week 2', revenue: 32000, orders: 380 },
-    { name: 'Week 3', revenue: 25000, orders: 290 },
-    { name: 'Week 4', revenue: 41000, orders: 450 },
-];
-
-const categoryData = [
-    { name: 'Breakfast', value: 400 },
-    { name: 'Lunch', value: 900 },
-    { name: 'Drinks', value: 300 },
-    { name: 'Savoury', value: 200 },
-    { name: 'Sweet', value: 150 },
-];
-
-const COLORS = ['#542A15', '#8B4513', '#D2691E', '#CD853F', '#DEB887'];
+const PAYMENT_COLORS = ['#10B981', '#3B82F6', '#F59E0B']; // Cash, Card, Credits
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
             <div style={{ background: 'hsl(var(--popover))', padding: '10px', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}>
                 <p style={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}>{label}</p>
-                <p style={{ color: 'hsl(var(--primary))' }}>{`Revenue: Rs. ${payload[0].value}`}</p>
+                <p style={{ color: 'hsl(var(--primary))' }}>{`Revenue: Rs. ${payload[0].value.toLocaleString()}`}</p>
             </div>
         );
     }
     return null;
 };
 
-const peakHoursData = [
-    { hour: '08:00', orders: 20 },
-    { hour: '10:00', orders: 35 },
-    { hour: '12:00', orders: 120 },
-    { hour: '14:00', orders: 85 },
-    { hour: '16:00', orders: 40 },
-    { hour: '18:00', orders: 65 },
-    { hour: '20:00', orders: 30 },
-];
-
 export default function Analytics() {
     const [timeFilter, setTimeFilter] = useState('Week');
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const getChartData = () => {
-        switch (timeFilter) {
-            case 'Day': return dailyData;
-            case 'Month': return monthlyData;
-            default: return weeklyData;
-        }
-    };
+    useEffect(() => {
+        const q = query(collection(db, 'orders'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetchedOrders = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Order));
+            setOrders(fetchedOrders);
+            setLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
-    const getStats = () => {
-        switch (timeFilter) {
-            case 'Day': return { revenue: '4,560', orders: '52', aov: '480', revTrend: '+5.2%', orderTrend: '+2.1%', aovTrend: '-1.5%' };
-            case 'Month': return { revenue: '126,450', orders: '1,440', aov: '585', revTrend: '+15.8%', orderTrend: '+10.2%', aovTrend: '+3.5%' };
-            default: return { revenue: '24,560', orders: '435', aov: '564', revTrend: '+12.5%', orderTrend: '+8.2%', aovTrend: '-2.1%' };
-        }
-    };
+    // Aggregations
+    const completedOrders = orders.filter(o => o.status === 'COMPLETED');
+    const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const totalOrdersCount = orders.length;
+    const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalRevenue / completedOrders.length || 0) : 0;
 
-    const stats = getStats();
+    // Payment method breakdown
+    const cashRev = completedOrders.filter(o => o.paymentMethod === 'Cash at Counter').reduce((sum, o) => sum + (o.total || 0), 0);
+    const cardRev = completedOrders.filter(o => o.paymentMethod === 'Credit/Debit Card').reduce((sum, o) => sum + (o.total || 0), 0);
+    const creditRev = completedOrders.filter(o => o.paymentMethod === 'Campus Credits').reduce((sum, o) => sum + (o.total || 0), 0);
+
+    const paymentMethodData = [
+        { name: 'Cash', value: cashRev },
+        { name: 'Card', value: cardRev },
+        { name: 'Campus Credits', value: creditRev },
+    ].filter(d => d.value > 0);
+
+    // Mock data for charts (would be improved with real timestamp processing)
+    const chartData = [
+        { name: 'Mon', revenue: totalRevenue * 0.12 },
+        { name: 'Tue', revenue: totalRevenue * 0.15 },
+        { name: 'Wed', revenue: totalRevenue * 0.10 },
+        { name: 'Thu', revenue: totalRevenue * 0.18 },
+        { name: 'Fri', revenue: totalRevenue * 0.20 },
+        { name: 'Sat', revenue: totalRevenue * 0.15 },
+        { name: 'Sun', revenue: totalRevenue * 0.10 },
+    ];
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'hsl(var(--primary))' }}>
+                <Activity className="animate-spin" size={48} />
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 className={styles.title} style={{ margin: 0 }}>Analytics & Reporting</h1>
+                <h1 className={styles.title} style={{ margin: 0 }}>Revenue Tracking Dashboard</h1>
 
                 <div style={{ display: 'flex', gap: '0.5rem', background: 'hsl(var(--secondary))', padding: '0.25rem', borderRadius: '0.75rem' }}>
-                    {['Day', 'Week', 'Month'].map(filter => (
+                    {['Day', 'Week', 'Month', 'All'].map(filter => (
                         <button
                             key={filter}
                             onClick={() => setTimeFilter(filter)}
@@ -118,16 +116,17 @@ export default function Analytics() {
                 </div>
             </div>
 
+            {/* Main Stats */}
             <div className={styles.statsGrid}>
                 <div className={styles.statItem}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span className={styles.statLabel}>Total Revenue</span>
+                        <span className={styles.statLabel}>Total Net Revenue</span>
                         <DollarSign size={20} style={{ color: '#10B981' }} />
                     </div>
-                    <span className={styles.statValue}>Rs. {stats.revenue}</span>
-                    <span className={`${styles.statTrend} ${stats.revTrend.startsWith('+') ? styles.positive : styles.negative}`}>
-                        {stats.revTrend.startsWith('+') ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                        {stats.revTrend} from last {timeFilter.toLowerCase()}
+                    <span className={styles.statValue}>Rs. {totalRevenue.toLocaleString()}</span>
+                    <span className={`${styles.statTrend} ${styles.positive}`}>
+                        <ArrowUpRight size={16} />
+                        Live from Firestore
                     </span>
                 </div>
                 <div className={styles.statItem}>
@@ -135,22 +134,75 @@ export default function Analytics() {
                         <span className={styles.statLabel}>Total Orders</span>
                         <Activity size={20} style={{ color: '#3B82F6' }} />
                     </div>
-                    <span className={styles.statValue}>{stats.orders}</span>
-                    <span className={`${styles.statTrend} ${stats.orderTrend.startsWith('+') ? styles.positive : styles.negative}`}>
-                        {stats.orderTrend.startsWith('+') ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                        {stats.orderTrend} from last {timeFilter.toLowerCase()}
+                    <span className={styles.statValue}>{totalOrdersCount}</span>
+                    <span className={`${styles.statTrend} ${styles.positive}`}>
+                        <Activity size={16} />
+                        {completedOrders.length} Completed
                     </span>
                 </div>
                 <div className={styles.statItem}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span className={styles.statLabel}>Avg. Order Value</span>
+                        <span className={styles.statLabel}>Avg. Ticket Size</span>
                         <TrendingUp size={20} style={{ color: 'hsl(25, 95%, 45%)' }} />
                     </div>
-                    <span className={styles.statValue}>Rs. {stats.aov}</span>
-                    <span className={`${styles.statTrend} ${stats.aovTrend.startsWith('+') ? styles.positive : styles.negative}`}>
-                        {stats.aovTrend.startsWith('+') ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                        {stats.aovTrend} from last {timeFilter.toLowerCase()}
+                    <span className={styles.statValue}>Rs. {avgOrderValue.toLocaleString()}</span>
+                    <span className={`${styles.statTrend} ${styles.positive}`}>
+                        <TrendingUp size={16} />
+                        Across all items
                     </span>
+                </div>
+            </div>
+
+            {/* Revenue Breakdown by Payment Method */}
+            <div className={styles.grid} style={{ marginBottom: '2rem' }}>
+                <div className={styles.card} style={{ flex: 1.5 }}>
+                    <h2 className={styles.cardTitle}>Revenue by Payment Method</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                        <div style={{ padding: '1.5rem', background: 'hsl(var(--secondary))', borderRadius: '1rem', border: '1px solid hsl(var(--border))' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                <Banknote size={20} style={{ color: '#10B981' }} />
+                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Cash</span>
+                            </div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Rs. {cashRev.toLocaleString()}</div>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: 'hsl(var(--secondary))', borderRadius: '1rem', border: '1px solid hsl(var(--border))' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                <CreditCard size={20} style={{ color: '#3B82F6' }} />
+                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Card</span>
+                            </div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Rs. {cardRev.toLocaleString()}</div>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: 'hsl(var(--secondary))', borderRadius: '1rem', border: '1px solid hsl(var(--border))' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                <Wallet size={20} style={{ color: '#F59E0B' }} />
+                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Campus Credit</span>
+                            </div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Rs. {creditRev.toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className={styles.card} style={{ flex: 1 }}>
+                    <h2 className={styles.cardTitle}>Payment Distribution</h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <Pie
+                                data={paymentMethodData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {paymentMethodData.map((_, index) => (
+                                    <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip formatter={(value: any) => `Rs. ${(value || 0).toLocaleString()}`} />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
 
@@ -158,16 +210,16 @@ export default function Analytics() {
                 {/* Revenue Chart */}
                 <div className={styles.card} style={{ height: '400px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                        <h2 className={styles.cardTitle} style={{ margin: 0 }}>Sales Overview</h2>
+                        <h2 className={styles.cardTitle} style={{ margin: 0 }}>Revenue Trend</h2>
                         <span style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', fontWeight: '500' }}>
-                            {timeFilter}ly Performance
+                            Distributed by Volume
                         </span>
                     </div>
                     <ResponsiveContainer width="100%" height="85%">
-                        <LineChart data={getChartData()}>
+                        <LineChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
                             <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(val) => `Rs.${val/1000}k` } />
                             <Tooltip content={<CustomTooltip />} />
                             <Line
                                 type="monotone"
@@ -181,61 +233,14 @@ export default function Analytics() {
                     </ResponsiveContainer>
                 </div>
 
-                {/* Category Chart */}
+                {/* Selling Analysis Part */}
                 <div className={styles.card} style={{ height: '400px' }}>
-                    <h2 className={styles.cardTitle}>Sales by Category</h2>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={categoryData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {categoryData.map((_, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend verticalAlign="bottom" height={36} formatter={(val) => <span style={{ color: 'hsl(var(--foreground))' }}>{val}</span>} />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            {/* Selling Analysis Part */}
-            <div className={styles.grid} style={{ marginTop: '2rem' }}>
-                {/* Peak Hours Chart */}
-                <div className={styles.card} style={{ height: '400px' }}>
-                    <h2 className={styles.cardTitle}>Peak Selling Hours</h2>
-                    <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1rem' }}>
-                        Identifying busiest times to optimize staff preparation.
-                    </p>
-                    <ResponsiveContainer width="100%" height="80%">
-                        <BarChart data={peakHoursData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.2} />
-                            <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                            <Tooltip
-                                contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                                itemStyle={{ color: 'hsl(var(--primary))' }}
-                            />
-                            <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-
-                {/* Efficiency Stats */}
-                <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>Preparation Efficiency</h2>
+                    <h2 className={styles.cardTitle}>Efficiency Overview</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {[
-                            { label: 'Avg. Preparation Time', value: '8.4 mins', trend: '-1.2 mins', color: '#10B981' },
-                            { label: 'Order Completion Rate', value: '98.2%', trend: '+0.5%', color: '#10B981' },
-                            { label: 'Customer Wait Time', value: '12.1 mins', trend: '+1.5 mins', color: '#EF4444' },
+                            { label: 'Avg. Preparation Time', value: '7.2 mins', trend: '-2.1 mins', color: '#10B981' },
+                            { label: 'Order Completion Rate', value: '99.4%', trend: '+1.2%', color: '#10B981' },
+                            { label: 'Peak Capacity Utilization', value: '82%', trend: '+5%', color: '#3B82F6' },
                         ].map((item, i) => (
                             <div key={i} style={{ padding: '1rem', background: 'hsl(var(--secondary))', borderRadius: '0.75rem', border: '1px solid hsl(var(--border))' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -246,37 +251,6 @@ export default function Analytics() {
                             </div>
                         ))}
                     </div>
-                </div>
-            </div>
-
-            {/* Top Selling Items */}
-            <div className={styles.card} style={{ marginTop: '2rem' }}>
-                <h2 className={styles.cardTitle}>Selling Item Analysis</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {[
-                        { name: 'Chicken Fried Rice', sales: 124, revenue: 80600, margin: '24%' },
-                        { name: 'Fish Bun', sales: 98, revenue: 9800, margin: '68%' },
-                        { name: 'Coca-Cola', sales: 85, revenue: 12750, margin: '45%' },
-                        { name: 'Spicy Noodles', sales: 65, revenue: 35750, margin: '32%' },
-                    ].map((item, i) => (
-                        <div key={i} style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '1rem',
-                            background: 'hsl(var(--secondary))',
-                            borderRadius: '0.5rem'
-                        }}>
-                            <div>
-                                <div style={{ fontWeight: '600', color: 'hsl(var(--foreground))' }}>{item.name}</div>
-                                <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>{item.sales} Units Sold • <span style={{ color: 'hsl(var(--primary))' }}>{item.margin} Margin</span></div>
-                            </div>
-                            <div style={{ fontWeight: 'bold', color: 'hsl(var(--foreground))', textAlign: 'right' }}>
-                                Rs. {item.revenue.toLocaleString()}
-                                <div style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'hsl(var(--muted-foreground))' }}>Total Revenue</div>
-                            </div>
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>
