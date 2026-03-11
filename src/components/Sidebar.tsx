@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, UtensilsCrossed, LogOut, Package, BarChart2 } from 'lucide-react';
+import { Home, UtensilsCrossed, LogOut, Package, BarChart2, Megaphone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './Sidebar.module.css';
 
@@ -12,6 +12,7 @@ export default function Sidebar() {
         { name: 'Dashboard', path: '/dashboard', icon: Home },
         { name: 'Orders', path: '/orders', icon: Package },
         { name: 'Availability', path: '/availability', icon: UtensilsCrossed },
+        { name: 'Marketing', path: '/marketing', icon: Megaphone },
         { name: 'Analytics', path: '/analytics', icon: BarChart2 },
     ];
 
