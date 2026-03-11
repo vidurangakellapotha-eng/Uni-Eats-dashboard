@@ -7,6 +7,7 @@ import Orders from './pages/Orders';
 import Inventory from './pages/Inventory';
 import Analytics from './pages/Analytics';
 import Marketing from './pages/Marketing';
+import Chat from './pages/Chat';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="/availability" element={<Inventory />} />
             <Route path="/marketing" element={<Marketing />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/chat" element={<Chat />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
