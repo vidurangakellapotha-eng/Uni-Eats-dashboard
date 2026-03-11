@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, where } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, where, writeBatch, doc } from 'firebase/firestore';
 import { Send, Search, MessageSquare } from 'lucide-react';
 
 interface Message {
@@ -11,6 +11,7 @@ interface Message {
     isAdmin: boolean;
     createdAt: any;
     chatId: string;
+    read: boolean;
 }
 
 interface ChatSession {
@@ -18,6 +19,7 @@ interface ChatSession {
     userName: string;
     lastMessage: string;
     timestamp: any;
+    unreadCount: number;
 }
 
 const Chat: React.FC = () => {
@@ -41,8 +43,15 @@ const Chat: React.FC = () => {
                         chatId: data.chatId,
                         userName: data.senderName || 'Student',
                         lastMessage: data.text,
-                        timestamp: data.createdAt
+                        timestamp: data.createdAt,
+                        unreadCount: 0
                     });
+                }
+                
+                // If student message is unread, increment count
+                if (!data.isAdmin && data.read === false) {
+                    const session = chatMap.get(data.chatId);
+                    if (session) session.unreadCount++;
                 }
             });
 
@@ -51,6 +60,20 @@ const Chat: React.FC = () => {
 
         return () => unsubscribe();
     }, []);
+
+    // Mark messages as read when admin selects a chat
+    useEffect(() => {
+        if (!selectedChatId || messages.length === 0) return;
+
+        const unreadMsgs = messages.filter(m => !m.isAdmin && m.read === false);
+        if (unreadMsgs.length > 0) {
+            const batch = writeBatch(db);
+            unreadMsgs.forEach(m => {
+                batch.update(doc(db, 'supportMessages', m.id), { read: true });
+            });
+            batch.commit().catch(err => console.error("Error marking messages read:", err));
+        }
+    }, [selectedChatId, messages]);
 
     // Fetch messages for selected chat
     useEffect(() => {
@@ -178,14 +201,30 @@ const Chat: React.FC = () => {
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ fontWeight: 'bold', color: '#1e293b' }}>{session.userName}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                        {session.timestamp?.toDate ? session.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                                    </span>
+                                    <span style={{ fontWeight: session.unreadCount > 0 ? '900' : 'bold', color: '#1e293b' }}>{session.userName}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        {session.unreadCount > 0 && (
+                                            <span style={{ 
+                                                background: '#ef4444', 
+                                                color: 'white', 
+                                                fontSize: '0.65rem', 
+                                                fontWeight: 'bold', 
+                                                padding: '2px 6px', 
+                                                borderRadius: '10px',
+                                                boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                                            }}>
+                                                {session.unreadCount} New
+                                            </span>
+                                        )}
+                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                            {session.timestamp?.toDate ? session.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                                        </span>
+                                    </div>
                                 </div>
                                 <p style={{ 
                                     fontSize: '0.875rem', 
-                                    color: '#64748b', 
+                                    color: session.unreadCount > 0 ? '#1e293b' : '#64748b', 
+                                    fontWeight: session.unreadCount > 0 ? '600' : 'normal',
                                     whiteSpace: 'nowrap', 
                                     overflow: 'hidden', 
                                     textOverflow: 'ellipsis',
