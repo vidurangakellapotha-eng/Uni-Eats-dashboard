@@ -56,15 +56,25 @@ const Chat: React.FC = () => {
     useEffect(() => {
         if (!selectedChatId) return;
 
+        // Using local sort to avoid Firestore composite index requirement
         const q = query(
             collection(db, 'supportMessages'),
-            where('chatId', '==', selectedChatId),
-            orderBy('createdAt', 'asc')
+            where('chatId', '==', selectedChatId)
         );
 
         const unsubscribe = onSnapshot(q, (snap) => {
             const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() } as Message));
+            
+            // Local sort by timestamp
+            msgs.sort((a, b) => {
+                const timeA = a.createdAt?.toMillis?.() || 0;
+                const timeB = b.createdAt?.toMillis?.() || 0;
+                return timeA - timeB;
+            });
+
             setMessages(msgs);
+        }, (err) => {
+            console.error("Admin chat messages error:", err);
         });
 
         return () => unsubscribe();
