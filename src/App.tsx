@@ -11,6 +11,9 @@ import Chat from './pages/Chat';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
+  window.addEventListener('load', () => {
+    console.log("%c Uni-Eats Ops Nexus v2.0 Active ", "background: #1e293b; color: #fb923c; font-weight: bold; padding: 4px 8px; border-radius: 4px;");
+  });
   return (
     <Router>
       <AuthProvider>
