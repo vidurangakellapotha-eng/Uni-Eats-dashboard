@@ -1,7 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth } from '../contexts/AuthContext';
-import styles from './Layout.module.css';
 import { ShieldX } from 'lucide-react';
 
 export default function Layout() {
@@ -78,10 +77,25 @@ export default function Layout() {
     }
 
     return (
-        <div className={styles.layout}>
-            <Sidebar />
-            <main className={styles.main}>
-                <Outlet />
+        <div className="flex min-h-screen overflow-x-hidden" style={{ display: 'flex', background: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 40%, #fff9ed 100%)' }}>
+            <style>{`
+                .sidebar-rail { width: 288px !important; flex-shrink: 0 !important; }
+                @media (max-width: 640px) {
+                    .sidebar-rail { display: none !important; }
+                    .main-content { margin-left: 0 !important; }
+                }
+                @media (min-width: 641px) {
+                    .sidebar-rail { display: block !important; }
+                    .main-content { margin-left: 288px !important; }
+                }
+            `}</style>
+            <div className="sidebar-rail hidden sm:block">
+                <Sidebar />
+            </div>
+            <main className="main-content flex-1 min-h-screen overflow-x-hidden relative">
+                <div className="pt-20 md:pt-0">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );

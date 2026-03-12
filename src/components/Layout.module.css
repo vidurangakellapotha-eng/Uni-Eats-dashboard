@@ -10,4 +10,20 @@
     padding: 2rem;
     overflow-y: auto;
     min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+    .main {
+        margin-left: 80px;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 5rem; /* Space for mobile header */
+    }
 }
