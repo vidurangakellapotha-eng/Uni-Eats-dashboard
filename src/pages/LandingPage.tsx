@@ -7,7 +7,7 @@ export default function LandingPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 overflow-hidden relative selection:bg-orange-100 selection:text-orange-900">
+        <div className="min-h-screen bg-transparent text-slate-900 overflow-hidden relative selection:bg-orange-100 selection:text-orange-900">
             {/* Ambient Background Elements */}
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-500/5 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse" />
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[100px] -ml-64 -mb-64" />
