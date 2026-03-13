@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Pencil, X, Save, Tag, AlignLeft, LayoutGrid, DollarSign } from 'lucide-react';
+import { Pencil, X, Save, Tag, AlignLeft, LayoutGrid, DollarSign, Camera, Upload } from 'lucide-react';
+import { uploadFoodImage } from '../storageUtils';
 import styles from './Inventory.module.css';
 
 interface MenuItem {
@@ -30,6 +31,9 @@ export default function Inventory() {
     const [editForm, setEditForm] = useState({ name: '', price: '', category: '', description: '', prepTime: '' });
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, 'menu'), (snapshot) => {
@@ -66,6 +70,16 @@ export default function Inventory() {
     const closeEdit = () => {
         setEditItem(null);
         setSaveSuccess(false);
+        setSelectedFile(null);
+        setImagePreview(null);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
     };
 
     const handleSave = async () => {
@@ -74,13 +88,22 @@ export default function Inventory() {
         if (isNaN(priceVal) || priceVal < 0) return;
 
         const prepTimeVal = editForm.prepTime !== '' ? parseInt(editForm.prepTime, 10) : null;
+        let imageUrl = editItem.image;
         setSaving(true);
         try {
+            // Upload new image if selected
+            if (selectedFile) {
+                setUploadingImage(true);
+                imageUrl = await uploadFoodImage(editItem.id, selectedFile);
+                setUploadingImage(false);
+            }
+
             await updateDoc(doc(db, 'menu', editItem.id), {
                 name: editForm.name.trim(),
                 price: priceVal,
                 category: editForm.category,
                 description: editForm.description.trim(),
+                image: imageUrl,
                 ...(prepTimeVal !== null && !isNaN(prepTimeVal) ? { prepTime: prepTimeVal } : {})
             });
             setSaveSuccess(true);
@@ -260,37 +283,42 @@ export default function Inventory() {
             <AnimatePresence>
                 {editItem && (
                     <>
-                        {/* Backdrop */}
-                        <motion.div
-                            key="backdrop"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={closeEdit}
-                            style={{
-                                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-                                zIndex: 50, backdropFilter: 'blur(4px)'
-                            }}
-                        />
-
-                        {/* Modal */}
-                        <motion.div
-                            key="modal"
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            style={{
-                                position: 'fixed', top: '50%', left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                zIndex: 51, width: '100%', maxWidth: '480px',
-                                background: 'hsl(var(--card))',
-                                borderRadius: '1.25rem',
-                                boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
-                                padding: '1.75rem',
-                                border: '1px solid hsl(var(--border))'
-                            }}
-                        >
+                        <div style={{
+                            position: 'fixed', inset: 0, zIndex: 1000,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            padding: '2rem'
+                        }}>
+                            {/* Backdrop */}
+                            <motion.div
+                                key="backdrop"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={closeEdit}
+                                style={{
+                                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)',
+                                    backdropFilter: 'blur(12px)'
+                                }}
+                            />
+    
+                            {/* Modal */}
+                            <motion.div
+                                key="modal"
+                                initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                                style={{
+                                    position: 'relative', width: '100%', maxWidth: '500px',
+                                    maxHeight: '90vh', overflowY: 'auto',
+                                    background: 'hsl(var(--card))',
+                                    borderRadius: '1.5rem',
+                                    boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)',
+                                    padding: '2.5rem',
+                                    border: '1px solid hsl(var(--border))',
+                                    zIndex: 1001
+                                }}
+                            >
                             {/* Modal Header */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -312,6 +340,58 @@ export default function Inventory() {
                                 <button onClick={closeEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '0.25rem' }}>
                                     <X size={20} />
                                 </button>
+                            </div>
+
+                            {/* Image Upload Selection */}
+                            <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                                <div style={{ 
+                                    width: '100%', 
+                                    height: '160px', 
+                                    borderRadius: '1rem', 
+                                    overflow: 'hidden', 
+                                    position: 'relative',
+                                    border: '2px dashed hsl(var(--border))',
+                                    background: 'hsl(var(--secondary)/0.3)'
+                                }}>
+                                    <img 
+                                        src={imagePreview || editItem.image} 
+                                        alt="Preview" 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                    />
+                                    <label style={{ 
+                                        position: 'absolute', 
+                                        inset: 0, 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center', 
+                                        background: 'rgba(0,0,0,0.4)', 
+                                        cursor: 'pointer',
+                                        transition: 'background 0.3s',
+                                        color: 'white',
+                                        zIndex: 10
+                                    }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.4)'}>
+                                        <div style={{ background: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '50%', marginBottom: '8px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                                            <Camera size={24} />
+                                        </div>
+                                        <span style={{ fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Change Photo</span>
+                                        <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+                                    </label>
+                                    
+                                    {uploadingImage && (
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', background: 'white', padding: '8px 16px', borderRadius: '32px', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
+                                                <div style={{ width: '16px', height: '16px', border: '2px solid #ddd', borderTop: '2px solid hsl(var(--primary))', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'black' }}>Uploading Image...</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                {selectedFile && !uploadingImage && (
+                                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#10B981', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <Upload size={14} /> Ready to update: {selectedFile.name}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Form Fields */}
@@ -477,16 +557,17 @@ export default function Inventory() {
                                 >
                                     {saveSuccess ? (
                                         <><span>✓</span> Saved!</>
-                                    ) : saving ? (
-                                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Saving...</>
+                                    ) : (saving || uploadingImage) ? (
+                                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> {uploadingImage ? 'Uploading Image...' : 'Saving...'}</>
                                     ) : (
                                         <><Save size={16} /> Save Changes</>
                                     )}
                                 </motion.button>
                             </div>
                         </motion.div>
-                    </>
-                )}
+                    </div>
+                </>
+            )}
             </AnimatePresence>
         </div>
     );
