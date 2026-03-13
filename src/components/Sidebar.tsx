@@ -112,7 +112,7 @@ export default function Sidebar() {
             )}
 
             {/* High-End Web Sidebar (Left Rail) */}
-            <aside className={`fixed top-0 left-0 h-screen w-72 bg-white border-r border-slate-100 flex flex-col z-[100] transition-transform duration-500 sm:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`fixed top-0 left-0 h-screen w-72 bg-white border-r border-slate-100 flex flex-col z-[100] transition-transform duration-500 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 {/* Brand */}
                 <div className="p-8">
                     <Link to="/dashboard" className="flex items-center gap-4 group">

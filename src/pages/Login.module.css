@@ -33,9 +33,9 @@
 }
 
 .card {
-    width: 100%;
+    width: 90%;
     max-width: 400px;
-    padding: 2.5rem;
+    padding: 1.5rem;
     background: var(--glass-bg);
     backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
@@ -43,6 +43,12 @@
     box-shadow: 0 25px 50px -12px rgba(84, 42, 21, 0.1);
     position: relative;
     z-index: 10;
+}
+
+@media (min-width: 640px) {
+    .card {
+        padding: 2.5rem;
+    }
 }
 
 .header {

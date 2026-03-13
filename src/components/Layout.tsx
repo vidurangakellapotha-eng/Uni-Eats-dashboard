@@ -77,24 +77,17 @@ export default function Layout() {
     }
 
     return (
-        <div className="flex min-h-screen overflow-x-hidden" style={{ display: 'flex', background: 'linear-gradient(135deg, #ffffff 0%, #fffdf5 40%, #fff9ed 100%)' }}>
-            <style>{`
-                .sidebar-rail { width: 288px !important; flex-shrink: 0 !important; }
-                @media (max-width: 640px) {
-                    .sidebar-rail { display: none !important; }
-                    .main-content { margin-left: 0 !important; }
-                }
-                @media (min-width: 641px) {
-                    .sidebar-rail { display: block !important; }
-                    .main-content { margin-left: 288px !important; }
-                }
-            `}</style>
-            <div className="sidebar-rail hidden sm:block">
-                <Sidebar />
-            </div>
-            <main className="main-content flex-1 min-h-screen overflow-x-hidden relative">
-                <div className="pt-20 md:pt-0">
-                    <Outlet />
+        <div className="min-h-screen bg-[#FFFDF5] selection:bg-primary/20 selection:text-primary">
+            {/* Sidebar Infrastructure */}
+            <Sidebar />
+            
+            {/* Core Application Layer */}
+            <main className="md:pl-72 min-h-screen transition-all duration-500 ease-in-out">
+                {/* Internal Page Viewport */}
+                <div className="w-full h-full pt-16 md:pt-0">
+                    <div className="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                        <Outlet />
+                    </div>
                 </div>
             </main>
         </div>

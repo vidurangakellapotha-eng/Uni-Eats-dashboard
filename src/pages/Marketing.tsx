@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Megaphone, Send, Info, Tag, Trash2, CheckCircle, Clock, Mail, BarChart, Users } from 'lucide-react';
 import { collection, addDoc, serverTimestamp, query, onSnapshot, deleteDoc, doc, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import styles from './Orders.module.css'; // borrowing some generic table styles
 
 export default function Marketing() {
     const [title, setTitle] = useState('');
@@ -146,103 +145,86 @@ export default function Marketing() {
     };
 
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div className="max-w-6xl mx-auto px-1 sm:px-4">
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                style={{ marginBottom: '2rem' }}
+                className="mb-10"
             >
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'hsl(var(--foreground))' }}>
-                    Marketing & News
-                </h1>
-                <p style={{ color: 'hsl(var(--muted-foreground))', fontSize: '0.875rem' }}>
-                    Send promotional deals or cafeteria updates to all students instantly.
-                </p>
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">
+                        Nexus <span className="text-primary italic">Marketing</span>
+                    </h1>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Global Broadcast Control Center</p>
+                </div>
             </motion.div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+                <div className="lg:col-span-5 flex flex-col gap-10">
                     {/* Compose Form */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className={styles.ordersCard}
-                        style={{ padding: '1.5rem', height: 'fit-content' }}
+                        className="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-zinc-800"
                     >
-                        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Send size={18} className="text-primary" />
-                            New Broadcast
+                        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight mb-8 flex items-center gap-3">
+                            <Send size={20} className="text-primary" />
+                            Global Transmission
                         </h2>
 
-                        <form onSubmit={handleSend} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        <form onSubmit={handleSend} className="flex flex-col gap-6">
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                                    Message Type
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                    Frequency Mode
                                 </label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                <div className="grid grid-cols-2 gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setType('promo')}
-                                        style={{
-                                            padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid',
-                                            borderColor: type === 'promo' ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                                            background: type === 'promo' ? 'hsla(var(--primary), 0.1)' : 'transparent',
-                                            color: type === 'promo' ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                                            fontSize: '0.875rem', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                            cursor: 'pointer', transition: 'all 0.2s'
-                                        }}
+                                        className={`
+                                            p-4 rounded-2xl border-none font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all
+                                            ${type === 'promo' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}
+                                        `}
                                     >
-                                        <Tag size={16} /> Promo Deal
+                                        <Tag size={16} /> Promo
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setType('news')}
-                                        style={{
-                                            padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid',
-                                            borderColor: type === 'news' ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                                            background: type === 'news' ? 'hsla(var(--primary), 0.1)' : 'transparent',
-                                            color: type === 'news' ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                                            fontSize: '0.875rem', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                            cursor: 'pointer', transition: 'all 0.2s'
-                                        }}
+                                        className={`
+                                            p-4 rounded-2xl border-none font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all
+                                            ${type === 'news' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}
+                                        `}
                                     >
-                                        <Info size={16} /> Campus News
+                                        <Info size={16} /> News
                                     </button>
                                 </div>
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                                    Title
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                    Transmission Title
                                 </label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="e.g. 🍔 Happy Hour: 50% Off!"
-                                    style={{
-                                        width: '100%', padding: '0.75rem', borderRadius: '0.5rem',
-                                        background: 'hsl(var(--secondary))', border: '1px solid hsl(var(--border))',
-                                        color: 'hsl(var(--foreground))', outline: 'none'
-                                    }}
+                                    placeholder="Execute Title..."
+                                    className="w-full p-4 bg-slate-50 dark:bg-zinc-800 border-none rounded-2xl outline-none text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                                    Message Body
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                    Broadcast Content
                                 </label>
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     placeholder="Write your announcement here..."
                                     rows={4}
-                                    style={{
-                                        width: '100%', padding: '0.75rem', borderRadius: '0.5rem',
-                                        background: 'hsl(var(--secondary))', border: '1px solid hsl(var(--border))',
-                                        color: 'hsl(var(--foreground))', outline: 'none', resize: 'none'
-                                    }}
+                                    className="w-full p-4 bg-slate-50 dark:bg-zinc-800 border-none rounded-2xl outline-none text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                                     required
                                 />
                             </div>
@@ -250,19 +232,18 @@ export default function Marketing() {
                             <button
                                 type="submit"
                                 disabled={sending}
-                                style={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-                                    padding: '1rem', borderRadius: '0.75rem', background: success ? 'hsl(142, 71%, 45%)' : 'hsl(var(--primary))',
-                                    color: 'white', border: 'none', fontWeight: 'bold', cursor: 'pointer',
-                                    transition: 'all 0.3s', marginTop: '0.5rem'
-                                }}
+                                className={`
+                                    flex items-center justify-center gap-3 p-5 rounded-2xl border-none font-black text-xs uppercase tracking-widest transition-all
+                                    ${success ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'}
+                                    disabled:opacity-50 active:scale-95
+                                `}
                             >
                                 {sending ? (
                                     <Clock size={20} className="animate-spin" />
                                 ) : success ? (
-                                    <><CheckCircle size={20} /> Sent Successfully!</>
+                                    <><CheckCircle size={20} /> Success</>
                                 ) : (
-                                    <><Megaphone size={20} /> Blast to All Users</>
+                                    <><Megaphone size={20} /> Blast to All</>
                                 )}
                             </button>
                         </form>
@@ -273,42 +254,32 @@ export default function Marketing() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className={styles.ordersCard}
-                        style={{ padding: '1.5rem', border: '1px solid hsl(var(--primary))', background: 'hsla(var(--primary), 0.02)' }}
+                        className="bg-emerald-50/50 dark:bg-zinc-800/20 p-8 rounded-[2.5rem] border border-emerald-100 dark:border-zinc-800"
                     >
-                        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Mail size={18} className="text-primary" />
-                            Weekly Newsletters
+                        <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4 flex items-center gap-3">
+                            <Mail size={20} className="text-emerald-600" />
+                            Email Digests
                         </h2>
-                        <p style={{ fontSize: '0.75rem', color: 'hsl(var(--muted-foreground))', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-                            Generate personalized spending summaries for students who have enabled the "Weekly Digest" setting.
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8 leading-relaxed">
+                            Sync spending summaries with opted-in student frequencies.
                         </p>
 
                         <button
                             onClick={runWeeklyDigest}
                             disabled={generatingDigest}
-                            style={{
-                                width: '100%', padding: '0.85rem', borderRadius: '0.5rem',
-                                background: 'white', border: '1px solid hsl(var(--primary))',
-                                color: 'hsl(var(--primary))', fontWeight: 'bold', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                transition: 'all 0.2s'
-                            }}
-                            className="hover:bg-primary hover:text-white"
+                            className="w-full p-4 bg-white dark:bg-zinc-800 text-emerald-600 border border-emerald-600/20 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-sm active:scale-95 disabled:opacity-50"
                         >
                             {generatingDigest ? (
-                                <Clock size={16} className="animate-spin" />
+                                <Clock size={16} className="animate-spin mx-auto" />
                             ) : (
-                                <><BarChart size={16} /> Trigger Weekly Digest Now</>
+                                <span className="flex items-center justify-center gap-2"><BarChart size={16} /> Run System Sync</span>
                             )}
                         </button>
 
                         {digestStatus && (
-                            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'hsl(var(--secondary))', borderRadius: '0.5rem', border: '1px solid hsl(var(--border))' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: '600', color: 'hsl(var(--primary))' }}>
-                                    <Users size={14} />
-                                    {digestStatus}
-                                </div>
+                            <div className="mt-4 p-4 bg-white dark:bg-zinc-800 rounded-2xl flex items-center gap-3 text-[10px] font-black text-emerald-600 uppercase tracking-widest animate-in fade-in slide-in-from-top-2">
+                                <Users size={14} />
+                                {digestStatus}
                             </div>
                         )}
                     </motion.div>
@@ -317,56 +288,49 @@ export default function Marketing() {
                 {/* History Section */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className={styles.ordersCard}
-                    style={{ padding: '1.5rem' }}
+                    className="lg:col-span-7 bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-zinc-800 flex flex-col"
                 >
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                        Broadcast History
+                    <h2 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight mb-8">
+                        Transmission Logs
                     </h2>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="space-y-4 flex-1 overflow-y-auto max-h-[800px] pr-2 custom-scrollbar">
                         <AnimatePresence>
                             {recentNews.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '3rem', color: 'hsl(var(--muted-foreground))' }}>
-                                    <Megaphone size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-                                    <p>No broadcast history yet.</p>
+                                <div className="text-center py-20 flex flex-col items-center">
+                                    <Megaphone size={48} className="text-slate-100 mb-4" />
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Historical Logs Found</p>
                                 </div>
                             ) : (
                                 recentNews.map((news) => (
                                     <motion.div
                                         key={news.id}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        style={{
-                                            padding: '1rem', borderRadius: '0.75rem',
-                                            background: 'hsl(var(--secondary))', border: '1px solid hsl(var(--border))',
-                                            position: 'relative'
-                                        }}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className="p-6 rounded-3xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 relative group overflow-hidden"
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                                            <span style={{
-                                                fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
-                                                padding: '0.2rem 0.5rem', borderRadius: '4px',
-                                                background: news.type === 'promo' ? 'hsla(25, 95%, 45%, 0.1)' : 'hsla(220, 80%, 60%, 0.1)',
-                                                color: news.type === 'promo' ? 'hsl(25, 95%, 45%)' : 'hsl(220, 80%, 60%)'
-                                            }}>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <span className={`
+                                                px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest
+                                                ${news.type === 'promo' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}
+                                            `}>
                                                 {news.type}
                                             </span>
                                             <button 
                                                 onClick={() => handleDelete(news.id)}
-                                                style={{ background: 'none', border: 'none', color: 'hsl(var(--muted-foreground))', cursor: 'pointer' }}
-                                                className="hover:text-red-500 transition-colors"
+                                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
-                                        <h3 style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>{news.title}</h3>
-                                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', lineHeight: '1.4' }}>{news.message}</p>
-                                        <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'hsl(var(--muted-foreground))', opacity: 0.6 }}>
-                                            Sent on {news.createdAt?.toDate ? news.createdAt.toDate().toLocaleString() : 'Just now'}
+                                        <h3 className="font-black text-slate-900 dark:text-white text-sm mb-2 uppercase tracking-tight">{news.title}</h3>
+                                        <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">{news.message}</p>
+                                        <div className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                                            <Clock size={10} />
+                                            {news.createdAt?.toDate ? news.createdAt.toDate().toLocaleString() : 'Recent Transmission'}
                                         </div>
                                     </motion.div>
                                 ))

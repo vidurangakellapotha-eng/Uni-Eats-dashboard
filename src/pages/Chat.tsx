@@ -152,217 +152,161 @@ const Chat: React.FC = () => {
     );
 
     return (
-        <div style={{ display: 'flex', height: 'calc(100vh - 100px)', gap: '1.5rem', padding: '1.5rem' }}>
-            {/* Sessions List */}
-            <div style={{ 
-                width: '350px', 
-                background: 'white', 
-                borderRadius: '1.25rem', 
-                display: 'flex', 
-                flexDirection: 'column',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                border: '1px solid #e2e8f0'
-            }}>
-                <div style={{ padding: '1.25rem', borderBottom: '1px solid #e2e8f0' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1e293b' }}>Support Chats</h2>
-                    <div style={{ position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+        <div className="flex h-[calc(100vh-120px)] md:h-[calc(100vh-80px)] bg-transparent gap-0 md:gap-6 px-0 md:px-1">
+            {/* Sessions List - Hidden on mobile if a chat is selected */}
+            <div className={`
+                ${selectedChatId ? 'hidden md:flex' : 'flex'} 
+                w-full md:w-[350px] lg:w-[400px] bg-white dark:bg-zinc-900 
+                rounded-none md:rounded-[2.5rem] flex-col shadow-xl shadow-slate-200/50 
+                dark:shadow-none border border-slate-100 dark:border-zinc-800 overflow-hidden
+            `}>
+                <div className="p-6 md:p-8 border-b border-slate-100 dark:border-zinc-800">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Nexus <span className="text-primary italic">Inbox</span></h2>
+                        <div className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">
+                            {filteredSessions.length} Active
+                        </div>
+                    </div>
+                    <div className="relative group">
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                         <input 
                             type="text" 
-                            placeholder="Search students..." 
+                            placeholder="Identify Student ID..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ 
-                                width: '100%', 
-                                padding: '0.625rem 0.75rem 0.625rem 2.5rem', 
-                                border: '1px solid #e2e8f0', 
-                                borderRadius: '0.75rem',
-                                outline: 'none',
-                                fontSize: '0.875rem'
-                            }}
+                            className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-zinc-800 border-none rounded-2xl outline-none text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all"
                         />
                     </div>
                 </div>
-                <div style={{ flex: 1, overflowY: 'auto' }}>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
                     {filteredSessions.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>No chats found</div>
+                        <div className="text-center py-20">
+                            <MessageSquare className="mx-auto mb-4 text-slate-200" size={48} />
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Transmissions Located</p>
+                        </div>
                     ) : (
                         filteredSessions.map(session => (
-                            <div 
+                            <button 
                                 key={session.chatId}
                                 onClick={() => setSelectedChatId(session.chatId)}
-                                style={{ 
-                                    padding: '1.25rem', 
-                                    borderBottom: '1px solid #f1f5f9', 
-                                    cursor: 'pointer',
-                                    background: selectedChatId === session.chatId ? 'hsl(var(--primary) / 0.05)' : 'transparent',
-                                    borderLeft: selectedChatId === session.chatId ? '4px solid hsl(var(--primary))' : '4px solid transparent',
-                                    transition: 'all 0.2s'
-                                }}
+                                className={`
+                                    w-full text-left p-5 rounded-[2rem] transition-all duration-300 flex flex-col gap-1 relative overflow-hidden group
+                                    ${selectedChatId === session.chatId 
+                                        ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' 
+                                        : 'hover:bg-slate-50 dark:hover:bg-zinc-800/50 text-slate-600 dark:text-zinc-400'}
+                                `}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                                    <span style={{ fontWeight: session.unreadCount > 0 ? '900' : 'bold', color: '#1e293b' }}>{session.userName}</span>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        {session.unreadCount > 0 && (
-                                            <span style={{ 
-                                                background: '#ef4444', 
-                                                color: 'white', 
-                                                fontSize: '0.65rem', 
-                                                fontWeight: 'bold', 
-                                                padding: '2px 6px', 
-                                                borderRadius: '10px',
-                                                boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
-                                            }}>
-                                                {session.unreadCount} New
-                                            </span>
-                                        )}
-                                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                            {session.timestamp?.toDate ? session.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                                        </span>
-                                    </div>
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-sm font-black uppercase tracking-tight truncate pr-4">
+                                        {session.userName}
+                                    </span>
+                                    <span className={`text-[10px] font-bold ${selectedChatId === session.chatId ? 'text-slate-400' : 'text-slate-400'}`}>
+                                        {session.timestamp?.toDate ? session.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                                    </span>
                                 </div>
-                                <p style={{ 
-                                    fontSize: '0.875rem', 
-                                    color: session.unreadCount > 0 ? '#1e293b' : '#64748b', 
-                                    fontWeight: session.unreadCount > 0 ? '600' : 'normal',
-                                    whiteSpace: 'nowrap', 
-                                    overflow: 'hidden', 
-                                    textOverflow: 'ellipsis',
-                                    margin: 0
-                                }}>
+                                <p className={`text-[12px] font-medium truncate ${selectedChatId === session.chatId ? 'text-slate-300' : 'text-slate-500'}`}>
                                     {session.lastMessage}
                                 </p>
-                            </div>
+                                {session.unreadCount > 0 && selectedChatId !== session.chatId && (
+                                    <div className="absolute right-4 bottom-4 w-5 h-5 bg-primary text-white text-[10px] font-black flex items-center justify-center rounded-full shadow-lg shadow-primary/40 animate-bounce">
+                                        {session.unreadCount}
+                                    </div>
+                                )}
+                            </button>
                         ))
                     )}
                 </div>
             </div>
 
-            {/* Chat Area */}
-            <div style={{ 
-                flex: 1, 
-                background: 'white', 
-                borderRadius: '1.25rem', 
-                display: 'flex', 
-                flexDirection: 'column',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                border: '1px solid #e2e8f0',
-                overflow: 'hidden'
-            }}>
+            {/* Chat Area - Visible on mobile if task selected */}
+            <div className={`
+                ${selectedChatId ? 'flex' : 'hidden md:flex'} 
+                flex-1 bg-white dark:bg-zinc-900 rounded-none md:rounded-[2.5rem] 
+                flex-col shadow-xl shadow-slate-200/50 dark:shadow-none 
+                border border-slate-100 dark:border-zinc-800 overflow-hidden
+            `}>
                 {selectedChatId ? (
                     <>
                         {/* Chat Header */}
-                        <div style={{ 
-                            padding: '1.25rem', 
-                            borderBottom: '1px solid #e2e8f0', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '1rem',
-                            background: '#f8fafc' 
-                        }}>
-                            <div style={{ width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: 'hsl(var(--primary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                {sessions.find(s => s.chatId === selectedChatId)?.userName.charAt(0) || 'S'}
-                            </div>
-                            <div>
-                                <h3 style={{ margin: 0, fontWeight: 'bold', color: '#1e293b' }}>{sessions.find(s => s.chatId === selectedChatId)?.userName}</h3>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Student User</p>
+                        <div className="px-6 py-5 md:px-8 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-slate-50/50 dark:bg-zinc-800/30">
+                            <div className="flex items-center gap-4">
+                                {selectedChatId && (
+                                    <button 
+                                        onClick={() => setSelectedChatId(null)}
+                                        className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
+                                    >
+                                        <Search size={20} className="rotate-180" /> {/* Using search as a back arrow stand-in for now, or just plain text */}
+                                        <span className="text-sm font-black ml-1 uppercase">Back</span>
+                                    </button>
+                                )}
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-orange-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-primary/20 rotate-3">
+                                    {sessions.find(s => s.chatId === selectedChatId)?.userName.charAt(0) || 'S'}
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                                        {sessions.find(s => s.chatId === selectedChatId)?.userName}
+                                    </h3>
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Transmission</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Messages */}
                         <div 
                             ref={scrollRef}
-                            style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', background: '#f1f5f9' }}
+                            className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 md:space-y-8 bg-slate-50/30 dark:bg-black/5 custom-scrollbar"
                         >
                             {messages.map(msg => (
                                 <div 
                                     key={msg.id}
-                                    style={{ 
-                                        alignSelf: msg.isAdmin ? 'flex-end' : 'flex-start',
-                                        maxWidth: '70%',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: msg.isAdmin ? 'flex-end' : 'flex-start'
-                                    }}
+                                    className={`flex flex-col ${msg.isAdmin ? 'items-end' : 'items-start'}`}
                                 >
-                                    <div style={{ 
-                                        padding: '0.75rem 1rem', 
-                                        borderRadius: '1rem', 
-                                        fontSize: '0.925rem',
-                                        background: msg.isAdmin ? 'hsl(var(--primary))' : 'white',
-                                        color: msg.isAdmin ? 'white' : '#1e293b',
-                                        boxShadow: '0 1px 2px rgb(0 0 0 / 0.05)',
-                                        border: msg.isAdmin ? 'none' : '1px solid #e2e8f0'
-                                    }}>
+                                    <div className={`
+                                        max-w-[85%] md:max-w-[70%] px-6 py-4 rounded-[2rem] text-sm md:text-base font-bold shadow-sm
+                                        ${msg.isAdmin 
+                                            ? 'bg-slate-900 text-white rounded-tr-none' 
+                                            : 'bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 rounded-tl-none border border-slate-100 dark:border-zinc-700'}
+                                    `}>
                                         {msg.text}
                                     </div>
-                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.25rem', padding: '0 0.5rem' }}>
-                                        {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Sending...'}
+                                    <span className="text-[10px] font-black text-slate-400 tracking-widest mt-2 px-2 uppercase">
+                                        {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Syncing...'}
                                     </span>
                                 </div>
                             ))}
                         </div>
 
                         {/* Input */}
-                        <div style={{ padding: '1.25rem', borderTop: '1px solid #e2e8f0' }}>
-                            <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.75rem' }}>
+                        <div className="p-6 md:p-8 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800">
+                            <form onSubmit={handleSend} className="flex gap-4">
                                 <input 
                                     type="text" 
-                                    placeholder="Type your reply..." 
+                                    placeholder="Execute Reply Transmission..." 
                                     value={inputText}
                                     onChange={(e) => setInputText(e.target.value)}
-                                    style={{ 
-                                        flex: 1, 
-                                        padding: '0.75rem 1rem', 
-                                        border: '2px solid #f1f5f9', 
-                                        borderRadius: '0.75rem',
-                                        outline: 'none',
-                                        fontSize: '0.925rem',
-                                        transition: 'border-color 0.2s'
-                                    }}
-                                    onFocus={(e) => e.currentTarget.style.borderColor = 'hsl(var(--primary))'}
-                                    onBlur={(e) => e.currentTarget.style.borderColor = '#f1f5f9'}
+                                    className="flex-1 px-6 py-4 bg-slate-50 dark:bg-zinc-800 border-none rounded-2xl outline-none text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all"
                                 />
                                 <button 
                                     type="submit"
                                     disabled={!inputText.trim()}
-                                    style={{ 
-                                        background: 'hsl(var(--primary))', 
-                                        color: 'white', 
-                                        border: 'none', 
-                                        borderRadius: '0.75rem', 
-                                        padding: '0.75rem 1.25rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        opacity: inputText.trim() ? 1 : 0.5
-                                    }}
+                                    className="px-6 md:px-10 py-4 bg-primary text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all flex items-center justify-center gap-2"
                                 >
                                     <Send size={18} />
-                                    Send
+                                    <span className="hidden sm:inline">Dispatch</span>
                                 </button>
                             </form>
                         </div>
                     </>
                 ) : (
-                    <div style={{ 
-                        flex: 1, 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: '#94a3b8',
-                        gap: '1rem'
-                    }}>
-                        <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                        <div className="w-24 h-24 rounded-[2.5rem] bg-slate-50 dark:bg-zinc-800 flex items-center justify-center text-slate-200 dark:text-zinc-700 mb-8 rotate-12 group-hover:rotate-0 transition-transform duration-700">
                             <MessageSquare size={48} />
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <h3 style={{ color: '#64748b', margin: '0 0 0.5rem 0' }}>Select a chat to reply</h3>
-                            <p style={{ margin: 0, fontSize: '0.875rem' }}>View and respond to student inquiries in real-time</p>
-                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">Nexus Terminal <span className="text-slate-300">Ready</span></h3>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest max-w-[280px]">Select a student frequency to begin secure communication.</p>
                     </div>
                 )}
             </div>
