@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, Wifi, WifiOff, User } from 'lucide-react';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
+import { pushNotification } from '../notificationUtils';
 import styles from './Orders.module.css';
 
 // Matches exactly how Uni Eats app stores orders in Firestore
@@ -58,10 +59,36 @@ export default function Orders() {
         return () => unsubscribe();
     }, []);
 
-    // Update order status using Uni Eats OrderStatus enum values
+    // Update order status and notify student
     const updateStatus = async (id: string, newStatus: Order['status']) => {
         try {
+            const orderObj = orders.find(o => o.id === id);
             await updateDoc(doc(db, 'orders', id), { status: newStatus });
+
+            if (orderObj) {
+                const shortId = id.slice(-6).toUpperCase();
+                let title = '';
+                let message = '';
+                let type = 'order';
+
+                if (newStatus === 'PREPARING') {
+                    title = '👨‍🍳 Being Prepared!';
+                    message = `Your order #${shortId} is now being prepared by the kitchen and will be ready soon.`;
+                    type = 'order';
+                } else if (newStatus === 'READY') {
+                    title = '🛍 Ready for Pickup!';
+                    message = `Order #${shortId} is hot and ready. Head to the counter to collect your meal!`;
+                    type = 'ready';
+                } else if (newStatus === 'COMPLETED') {
+                    title = '✅ Order Picked Up';
+                    message = `Enjoy your meal! Order #${shortId} has been successfully completed.`;
+                    type = 'completed';
+                }
+
+                if (title) {
+                    await pushNotification(orderObj.userId, title, message, type, id);
+                }
+            }
         } catch (err) {
             console.error('Failed to update order status:', err);
         }
@@ -69,7 +96,19 @@ export default function Orders() {
 
     const rejectOrder = async (id: string) => {
         try {
+            const orderObj = orders.find(o => o.id === id);
             await updateDoc(doc(db, 'orders', id), { status: 'REJECTED' });
+
+            if (orderObj) {
+                const shortId = id.slice(-6).toUpperCase();
+                await pushNotification(
+                    orderObj.userId, 
+                    '❌ Order Rejected', 
+                    `We're sorry! Order #${shortId} has been rejected. Please check with the counter or try again.`, 
+                    'alert', 
+                    id
+                );
+            }
         } catch (err) {
             console.error('Failed to reject order:', err);
         }
