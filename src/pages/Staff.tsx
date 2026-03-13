@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, UserPlus, Mail, Trash2, Shield } from 'lucide-react';
 import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, firebaseConfig } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
+
 
 export default function Staff() {
     const { user } = useAuth();
@@ -11,7 +14,9 @@ export default function Staff() {
     const [invites, setInvites] = useState<any[]>([]);
     const [newEmail, setNewEmail] = useState('');
     const [newName, setNewName] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const isOwner = user?.email === 'vidurangakellapotha@gmail.com';
 
@@ -29,7 +34,30 @@ export default function Staff() {
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newEmail || !isOwner) return;
+        setIsSubmitting(true);
         try {
+            // STEP 1: Optionally create the actual Firebase Auth user if a password is provided
+            // We use a temporary secondary App instance so that the active Owner is NOT forcefully logged out!
+            if (newPassword.trim().length > 0) {
+                if (newPassword.length < 6) {
+                    alert("Password must be at least 6 characters long.");
+                    setIsSubmitting(false);
+                    return;
+                }
+                const secondaryApp = initializeApp(firebaseConfig, "SecondaryTempApp");
+                const secondaryAuth = getAuth(secondaryApp);
+                try {
+                    await createUserWithEmailAndPassword(secondaryAuth, newEmail.toLowerCase(), newPassword);
+                } catch (authErr: any) {
+                    if (authErr.code !== 'auth/email-already-in-use') {
+                        throw authErr;
+                    }
+                }
+                // Clean up the secondary app instance
+                await deleteApp(secondaryApp);
+            }
+
+            // STEP 2: Write them to the whitelist so AuthContext escalates their clearance on login
             await setDoc(doc(db, 'employee_invites', newEmail.toLowerCase()), {
                 email: newEmail.toLowerCase(),
                 name: newName || 'Employee',
@@ -38,10 +66,13 @@ export default function Staff() {
             });
             setNewEmail('');
             setNewName('');
-            alert('Employee access granted! They can now log in via Google or Email/Password.');
-        } catch (err) {
+            setNewPassword('');
+            alert('Employee access granted successfully!');
+        } catch (err: any) {
             console.error('Failed to grant access:', err);
-            alert('Failed to modify permissions. Make sure you are the Owner.');
+            alert(`Failed: ${err.message || 'Make sure you are the Owner and the network is online.'}`);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -174,15 +205,29 @@ export default function Staff() {
                                         placeholder="employee@example.com"
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Set Password (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={newPassword}
+                                        onChange={e => setNewPassword(e.target.value)}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                                        placeholder="Leave blank for Google SSO only"
+                                    />
+                                </div>
                                 <button
                                     type="submit"
-                                    className="w-full bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] py-4 rounded-xl hover:bg-orange-600 transition-colors flex justify-center items-center gap-2 shadow-lg shadow-slate-900/10"
+                                    disabled={isSubmitting}
+                                    className={`w-full text-white font-black uppercase tracking-widest text-[10px] py-4 rounded-xl flex justify-center items-center gap-2 shadow-lg transition-all ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-orange-600 shadow-slate-900/10'}`}
                                 >
-                                    <Shield size={14} />
-                                    Authorize Account
+                                    {isSubmitting ? (
+                                        <><span className="material-icons-round animate-spin text-[14px]">sync</span> Processing...</>
+                                    ) : (
+                                        <><Shield size={14} /> Authorize Account</>
+                                    )}
                                 </button>
                                 <p className="text-[10px] leading-relaxed text-slate-400 mt-4 text-center px-2">
-                                    When granted, the employee can log in immediately using their Google account via the main login screen.
+                                    If you provide a password, the system generates an immediate application account. If left blank, they must use "Continue with Google".
                                 </p>
                             </form>
                         )}
