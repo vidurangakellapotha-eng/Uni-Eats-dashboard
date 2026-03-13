@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   TrendingUp,
   History,
-  Megaphone
+  Megaphone,
+  UserCog
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
@@ -66,6 +67,7 @@ export default function Sidebar() {
             name: 'Business Account',
             icon: Settings,
             subItems: [
+                { name: 'Team Access', path: '/staff', icon: UserCog },
                 { name: 'Analytics', path: '/analytics', icon: TrendingUp },
                 { name: 'Marketing', path: '/marketing', icon: Megaphone },
                 { name: 'Support Inbox', path: '/chat', icon: MessageSquare, hasBadge: unreadSupport > 0 },

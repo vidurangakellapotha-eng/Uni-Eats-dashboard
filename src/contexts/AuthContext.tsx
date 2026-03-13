@@ -31,7 +31,6 @@ async function checkAdminRole(user: User): Promise<boolean> {
         if (adminDoc.exists()) return true;
 
         // First-ever login: auto-grant admin to your specific account
-        // Remove this block after you've set up your admin account
         const OWNER_EMAIL = 'vidurangakellapotha@gmail.com';
         if (user.email === OWNER_EMAIL) {
             await setDoc(doc(db, 'admins', user.uid), {
@@ -41,6 +40,21 @@ async function checkAdminRole(user: User): Promise<boolean> {
             });
             return true;
         }
+
+        // CHECK for pending employee invites
+        if (user.email) {
+            const inviteDoc = await getDoc(doc(db, 'employee_invites', user.email.toLowerCase()));
+            if (inviteDoc.exists()) {
+                await setDoc(doc(db, 'admins', user.uid), {
+                    email: user.email,
+                    name: user.displayName || inviteDoc.data().name || 'Staff',
+                    role: inviteDoc.data().role || 'employee',
+                    grantedAt: new Date().toISOString()
+                });
+                return true;
+            }
+        }
+
         return false;
     } catch {
         return false;
