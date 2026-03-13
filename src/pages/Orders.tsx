@@ -75,18 +75,17 @@ export default function Orders() {
                     title = '👨‍🍳 Being Prepared!';
                     message = `Your order #${shortId} is now being prepared by the kitchen and will be ready soon.`;
                     type = 'order';
+                    await pushNotification(orderObj.userId, title, message, type, id, 'restaurant', '#F59E0B');
                 } else if (newStatus === 'READY') {
                     title = '🛍 Ready for Pickup!';
                     message = `Order #${shortId} is hot and ready. Head to the counter to collect your meal!`;
                     type = 'ready';
+                    await pushNotification(orderObj.userId, title, message, type, id, 'shopping_bag', '#10B981');
                 } else if (newStatus === 'COMPLETED') {
                     title = '✅ Order Picked Up';
                     message = `Enjoy your meal! Order #${shortId} has been successfully completed.`;
                     type = 'completed';
-                }
-
-                if (title) {
-                    await pushNotification(orderObj.userId, title, message, type, id);
+                    await pushNotification(orderObj.userId, title, message, type, id, 'check_circle', '#6366F1');
                 }
             }
         } catch (err) {
@@ -106,7 +105,9 @@ export default function Orders() {
                     '❌ Order Rejected', 
                     `We're sorry! Order #${shortId} has been rejected. Please check with the counter or try again.`, 
                     'alert', 
-                    id
+                    id,
+                    'cancel',
+                    '#EF4444'
                 );
             }
         } catch (err) {

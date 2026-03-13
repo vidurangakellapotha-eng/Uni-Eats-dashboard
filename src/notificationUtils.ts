@@ -6,8 +6,14 @@ export const pushNotification = async (
     title: string,
     message: string,
     type: string,
-    orderId?: string
+    orderId?: string,
+    icon?: string,
+    color?: string
 ) => {
+    if (!userId) {
+        console.warn("Attempted to push notification without userId");
+        return;
+    }
     try {
         await addDoc(collection(db, 'notifications'), {
             userId,
@@ -15,9 +21,12 @@ export const pushNotification = async (
             message,
             type,
             orderId: orderId || '',
+            icon: icon || '',
+            color: color || '',
             read: false,
             createdAt: serverTimestamp(),
         });
+        console.log(`Notification pushed to user ${userId}: ${title}`);
     } catch (error) {
         console.error("Error creating notification:", error);
     }
