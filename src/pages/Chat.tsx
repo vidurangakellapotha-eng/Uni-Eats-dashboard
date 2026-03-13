@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, where, writeBatch, doc } from 'firebase/firestore';
-import { Send, Search, MessageSquare } from 'lucide-react';
+import { Send, Search, MessageSquare, ArrowLeft } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -233,10 +233,9 @@ const Chat: React.FC = () => {
                                 {selectedChatId && (
                                     <button 
                                         onClick={() => setSelectedChatId(null)}
-                                        className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
+                                        className="md:hidden p-2.5 -ml-2 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 active:scale-90 transition-all"
                                     >
-                                        <Search size={20} className="rotate-180" /> {/* Using search as a back arrow stand-in for now, or just plain text */}
-                                        <span className="text-sm font-black ml-1 uppercase">Back</span>
+                                        <ArrowLeft size={20} />
                                     </button>
                                 )}
                                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-orange-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-primary/20 rotate-3">

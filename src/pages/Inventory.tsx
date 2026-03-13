@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Pencil, X, Save, Tag, AlignLeft, LayoutGrid, DollarSign, Camera, Upload } from 'lucide-react';
+import { Pencil, X, Camera } from 'lucide-react';
 import { uploadFoodImage } from '../storageUtils';
 import styles from './Inventory.module.css';
 
@@ -91,7 +91,6 @@ export default function Inventory() {
         let imageUrl = editItem.image;
         setSaving(true);
         try {
-            // Upload new image if selected
             if (selectedFile) {
                 setUploadingImage(true);
                 imageUrl = await uploadFoodImage(editItem.id, selectedFile);
@@ -179,12 +178,12 @@ export default function Inventory() {
                 {/* Mobile Card View */}
                 <div className="grid grid-cols-1 gap-4 md:hidden mb-10">
                     {filteredItems.length === 0 ? (
-                        <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs bg-white rounded-3xl border border-slate-100 italic">No Matching Units</div>
+                        <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 italic">No Matching Units</div>
                     ) : (
                         filteredItems.map(item => (
-                            <div key={item.id} className={`bg-white dark:bg-zinc-900 p-5 rounded-[2rem] border border-slate-100 transition-opacity duration-500 ${!item.available ? 'opacity-60 bg-slate-50' : ''}`}>
+                            <div key={item.id} className={`bg-white dark:bg-zinc-900 p-5 rounded-[2rem] border border-slate-100 dark:border-zinc-800 transition-opacity duration-500 ${!item.available ? 'opacity-60 bg-slate-50 dark:bg-zinc-800/50' : ''}`}>
                                 <div className="flex gap-4 mb-4">
-                                    <div className="w-20 h-20 rounded-2xl bg-slate-100 overflow-hidden shadow-inner border border-white">
+                                    <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-zinc-800 overflow-hidden shadow-inner border border-white/20">
                                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -195,11 +194,11 @@ export default function Inventory() {
                                                 <span className="text-[10px] font-black">{item.rating}</span>
                                             </div>
                                         </div>
-                                        <h4 className="font-black text-slate-900 text-lg uppercase tracking-tighter truncate">{item.name}</h4>
+                                        <h4 className="font-black text-slate-900 dark:text-white text-lg uppercase tracking-tighter truncate">{item.name}</h4>
                                         <p className="text-primary font-black text-sm">Rs. {item.price}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-zinc-800">
                                     <div className="flex items-center gap-3">
                                         <label className={styles.toggle}>
                                             <input
@@ -213,7 +212,7 @@ export default function Inventory() {
                                     </div>
                                     <button 
                                         onClick={() => openEdit(item)}
-                                        className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors"
+                                        className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors"
                                     >
                                         <Pencil size={18} />
                                     </button>
@@ -240,7 +239,7 @@ export default function Inventory() {
                         <tbody>
                             {filteredItems.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
+                                    <td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
                                         No items found.
                                     </td>
                                 </tr>
@@ -259,7 +258,7 @@ export default function Inventory() {
                                                 <img
                                                     src={item.image} alt={item.name}
                                                     style={{ width: '44px', height: '44px', borderRadius: '0.5rem', objectFit: 'cover', flexShrink: 0 }}
-                                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                    onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150'; }}
                                                 />
                                                 <div>
                                                     <div style={{ fontWeight: '600', color: 'hsl(var(--foreground))' }}>{item.name}</div>
@@ -303,14 +302,7 @@ export default function Inventory() {
                                         <td className={styles.td} style={{ textAlign: 'center' }}>
                                             <button
                                                 onClick={() => openEdit(item)}
-                                                title="Edit item"
-                                                style={{
-                                                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                                    padding: '0.4rem 0.75rem', borderRadius: '0.5rem', cursor: 'pointer',
-                                                    border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                                                    color: 'hsl(var(--foreground))', fontSize: '0.8rem', fontWeight: '600',
-                                                    transition: 'all 0.15s'
-                                                }}
+                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all"
                                             >
                                                 <Pencil size={13} /> Edit
                                             </button>
@@ -327,292 +319,78 @@ export default function Inventory() {
             {/* Edit Modal */}
             <AnimatePresence>
                 {editItem && (
-                    <>
-                        <div style={{
-                            position: 'fixed', inset: 0, zIndex: 1000,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            padding: '2rem'
-                        }}>
-                            {/* Backdrop */}
-                            <motion.div
-                                key="backdrop"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={closeEdit}
-                                style={{
-                                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)',
-                                    backdropFilter: 'blur(12px)'
-                                }}
-                            />
-    
-                            {/* Modal */}
-                            <motion.div
-                                key="modal"
-                                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                                transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-                                style={{
-                                    position: 'relative', width: '100%', maxWidth: '500px',
-                                    maxHeight: '90vh', overflowY: 'auto',
-                                    background: 'hsl(var(--card))',
-                                    borderRadius: '1.5rem',
-                                    boxShadow: '0 40px 100px -20px rgba(0,0,0,0.5)',
-                                    padding: '2.5rem',
-                                    border: '1px solid hsl(var(--border))',
-                                    zIndex: 1001
-                                }}
-                            >
-                            {/* Modal Header */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    {editItem.image && (
-                                        <img src={editItem.image} alt={editItem.name}
-                                            style={{ width: '48px', height: '48px', borderRadius: '0.75rem', objectFit: 'cover' }}
-                                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                        />
-                                    )}
-                                    <div>
-                                        <h2 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'hsl(var(--foreground))', margin: 0 }}>
-                                            Edit Menu Item
-                                        </h2>
-                                        <p style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', margin: 0 }}>
-                                            Changes apply immediately
-                                        </p>
-                                    </div>
+                    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                        <motion.div
+                            key="backdrop"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={closeEdit}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                        />
+                        <motion.div
+                            key="modal"
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-[1001]"
+                        >
+                            <div className="p-6 sm:p-8">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold dark:text-white">Edit Item</h2>
+                                    <button onClick={closeEdit} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
+                                        <X size={20} className="text-slate-500" />
+                                    </button>
                                 </div>
-                                <button onClick={closeEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--muted-foreground))', padding: '0.25rem' }}>
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            {/* Image Upload Selection */}
-                            <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                                <div style={{ 
-                                    width: '100%', 
-                                    height: '160px', 
-                                    borderRadius: '1rem', 
-                                    overflow: 'hidden', 
-                                    position: 'relative',
-                                    border: '2px dashed hsl(var(--border))',
-                                    background: 'hsl(var(--secondary)/0.3)'
-                                }}>
-                                    <img 
-                                        src={imagePreview || editItem.image} 
-                                        alt="Preview" 
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                    />
-                                    <label style={{ 
-                                        position: 'absolute', 
-                                        inset: 0, 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
-                                        background: 'rgba(0,0,0,0.4)', 
-                                        cursor: 'pointer',
-                                        transition: 'background 0.3s',
-                                        color: 'white',
-                                        zIndex: 10
-                                    }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.4)'}>
-                                        <div style={{ background: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '50%', marginBottom: '8px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.3)' }}>
-                                            <Camera size={24} />
-                                        </div>
-                                        <span style={{ fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Change Photo</span>
-                                        <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
-                                    </label>
-                                    
-                                    {uploadingImage && (
-                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', background: 'white', padding: '8px 16px', borderRadius: '32px', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
-                                                <div style={{ width: '16px', height: '16px', border: '2px solid #ddd', borderTop: '2px solid hsl(var(--primary))', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                                                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'black' }}>Uploading Image...</span>
+                                <div className="space-y-4">
+                                    <div className="relative group aspect-video rounded-2xl bg-slate-100 dark:bg-zinc-800 overflow-hidden border-2 border-dashed border-slate-200 dark:border-zinc-700">
+                                        <img src={imagePreview || editItem.image} alt="Preview" className="w-full h-full object-cover" />
+                                        <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                            <Camera className="text-white mb-2" />
+                                            <span className="text-white text-xs font-medium">Change Image</span>
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                        </label>
+                                        {(saving || uploadingImage) && (
+                                            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center">
+                                                <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin" />
                                             </div>
+                                        )}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="col-span-2">
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Item Name</label>
+                                            <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
                                         </div>
-                                    )}
-                                </div>
-                                {selectedFile && !uploadingImage && (
-                                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#10B981', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Upload size={14} /> Ready to update: {selectedFile.name}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Form Fields */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-                                {/* Name */}
-                                <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        <Tag size={12} /> Item Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editForm.name}
-                                        onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                                        style={{
-                                            width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem',
-                                            border: '1.5px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                                            color: 'hsl(var(--foreground))', fontSize: '0.95rem', outline: 'none',
-                                            transition: 'border-color 0.2s', boxSizing: 'border-box'
-                                        }}
-                                        onFocus={e => e.target.style.borderColor = 'hsl(var(--primary))'}
-                                        onBlur={e => e.target.style.borderColor = 'hsl(var(--border))'}
-                                    />
-                                </div>
-
-                                {/* Price */}
-                                <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        <DollarSign size={12} /> Price (Rs.)
-                                    </label>
-                                    <div style={{ position: 'relative' }}>
-                                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'hsl(var(--primary))', fontWeight: '700', fontSize: '1rem' }}>Rs.</span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="0.50"
-                                            value={editForm.price}
-                                            onChange={e => setEditForm(f => ({ ...f, price: e.target.value }))}
-                                            style={{
-                                                width: '100%', padding: '0.75rem 1rem 0.75rem 3.5rem',
-                                                borderRadius: '0.75rem', border: '1.5px solid hsl(var(--border))',
-                                                background: 'hsl(var(--background))', color: 'hsl(var(--foreground))',
-                                                fontSize: '1.1rem', fontWeight: '700', outline: 'none',
-                                                boxSizing: 'border-box', transition: 'border-color 0.2s'
-                                            }}
-                                            onFocus={e => e.target.style.borderColor = 'hsl(var(--primary))'}
-                                            onBlur={e => e.target.style.borderColor = 'hsl(var(--border))'}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Category */}
-                                <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        <LayoutGrid size={12} /> Category
-                                    </label>
-                                    <select
-                                        value={editForm.category}
-                                        onChange={e => setEditForm(f => ({ ...f, category: e.target.value }))}
-                                        style={{
-                                            width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem',
-                                            border: '1.5px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                                            color: 'hsl(var(--foreground))', fontSize: '0.95rem', outline: 'none',
-                                            boxSizing: 'border-box', cursor: 'pointer'
-                                        }}
-                                    >
-                                        {editableCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                </div>
-
-                                {/* Description */}
-                                <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        <AlignLeft size={12} /> Description
-                                    </label>
-                                    <textarea
-                                        value={editForm.description}
-                                        onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
-                                        rows={2}
-                                        style={{
-                                            width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem',
-                                            border: '1.5px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                                            color: 'hsl(var(--foreground))', fontSize: '0.9rem', outline: 'none',
-                                            resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
-                                            transition: 'border-color 0.2s'
-                                        }}
-                                        onFocus={e => e.target.style.borderColor = 'hsl(var(--primary))'}
-                                        onBlur={e => e.target.style.borderColor = 'hsl(var(--border))'}
-                                    />
-                                </div>
-
-                                {/* Prep Time */}
-                                <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        ⏱ Prep Time (minutes)
-                                    </label>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            max="120"
-                                            step="1"
-                                            placeholder="e.g. 10"
-                                            value={editForm.prepTime}
-                                            onChange={e => setEditForm(f => ({ ...f, prepTime: e.target.value }))}
-                                            style={{
-                                                width: '120px', padding: '0.75rem 1rem', borderRadius: '0.75rem',
-                                                border: '1.5px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                                                color: 'hsl(var(--foreground))', fontSize: '1rem', fontWeight: '700',
-                                                outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s',
-                                                textAlign: 'center'
-                                            }}
-                                            onFocus={e => e.target.style.borderColor = 'hsl(var(--primary))'}
-                                            onBlur={e => e.target.style.borderColor = 'hsl(var(--border))'}
-                                        />
-                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                            {[5, 10, 15, 20, 30].map(mins => (
-                                                <button
-                                                    key={mins}
-                                                    type="button"
-                                                    onClick={() => setEditForm(f => ({ ...f, prepTime: String(mins) }))}
-                                                    style={{
-                                                        padding: '0.4rem 0.75rem', borderRadius: '0.5rem', cursor: 'pointer',
-                                                        border: '1px solid', fontSize: '0.8rem', fontWeight: '600',
-                                                        borderColor: editForm.prepTime === String(mins) ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                                                        background: editForm.prepTime === String(mins) ? 'hsla(25,95%,45%,0.1)' : 'hsl(var(--background))',
-                                                        color: editForm.prepTime === String(mins) ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                                                        transition: 'all 0.15s'
-                                                    }}
-                                                >
-                                                    {mins}m
-                                                </button>
-                                            ))}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Price (Rs.)</label>
+                                            <input type="number" value={editForm.price} onChange={e => setEditForm({...editForm, price: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Prep Time (Min)</label>
+                                            <input type="number" value={editForm.prepTime} onChange={e => setEditForm({...editForm, prepTime: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
                                         </div>
                                     </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Category</label>
+                                        <select value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-primary/20 dark:text-white appearance-none">
+                                            {editableCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Description</label>
+                                        <textarea value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} rows={3} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-primary/20 dark:text-white resize-none" />
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                                <button
-                                    onClick={closeEdit}
-                                    style={{
-                                        flex: 1, padding: '0.875rem', borderRadius: '0.75rem', cursor: 'pointer',
-                                        border: '1.5px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                                        color: 'hsl(var(--foreground))', fontWeight: '600', fontSize: '0.95rem'
-                                    }}
-                                >
-                                    Cancel
-                                </button>
-                                <motion.button
-                                    whileTap={{ scale: 0.97 }}
-                                    onClick={handleSave}
-                                    disabled={saving || !editForm.name.trim() || !editForm.price}
-                                    style={{
-                                        flex: 2, padding: '0.875rem', borderRadius: '0.75rem', cursor: 'pointer',
-                                        border: 'none',
-                                        background: saveSuccess ? '#10B981' : 'hsl(var(--primary))',
-                                        color: 'white', fontWeight: '700', fontSize: '0.95rem',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                        transition: 'background 0.3s', opacity: saving ? 0.8 : 1
-                                    }}
-                                >
-                                    {saveSuccess ? (
-                                        <><span>✓</span> Saved!</>
-                                    ) : (saving || uploadingImage) ? (
-                                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> {uploadingImage ? 'Uploading Image...' : 'Saving...'}</>
-                                    ) : (
-                                        <><Save size={16} /> Save Changes</>
-                                    )}
-                                </motion.button>
+                                <div className="mt-8 flex gap-3">
+                                    <button onClick={closeEdit} className="flex-1 px-6 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 transition-colors">Cancel</button>
+                                    <button onClick={handleSave} disabled={saving || uploadingImage} className={`flex-1 px-6 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${saveSuccess ? 'bg-emerald-500' : 'bg-primary'}`}>
+                                        {saveSuccess ? <>✓ Saved</> : (saving || uploadingImage) ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving</> : <>Save Changes</>}
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
-                </>
-            )}
+                )}
             </AnimatePresence>
         </div>
     );

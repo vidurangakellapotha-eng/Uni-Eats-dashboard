@@ -3,7 +3,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
 } from 'recharts';
 import styles from './Analytics.module.css';
-import { ArrowUpRight, TrendingUp, DollarSign, Activity, Calendar, Wallet, CreditCard, Banknote } from 'lucide-react';
+import { ArrowUpRight, TrendingUp, DollarSign, Activity, Wallet, CreditCard, Banknote } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 
