@@ -89,11 +89,11 @@ export default function Sidebar() {
         <>
             {/* Mobile Header with Glassmorphism */}
             <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 flex items-center justify-between z-[100]">
-                <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 rotate-1 overflow-hidden border border-white/20">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden border border-white/20">
                         <img src="/logo.png" alt="Uni Eats" className="w-full h-full object-cover scale-110" />
                     </div>
-                    <span className="font-black tracking-tighter uppercase text-sm">Uni Eats <span className="text-orange-600">Ops</span></span>
+                    <span className="font-black tracking-tighter uppercase text-base">Uni-Eats <span className="text-orange-600 font-bold opacity-80">Ops</span></span>
                 </div>
                 <button 
                     onClick={() => setIsOpen(!isOpen)} 
@@ -116,10 +116,13 @@ export default function Sidebar() {
                 {/* Brand */}
                 <div className="p-8">
                     <Link to="/dashboard" className="flex items-center gap-4 group">
-                        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/30 rotate-3 group-hover:rotate-0 transition-all duration-700 overflow-hidden border-2 border-slate-50">
+                        <div className="w-14 h-14 rounded-3xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 group-hover:scale-105 transition-all duration-500 overflow-hidden border-2 border-white">
                             <img src="/logo.png" alt="Uni Eats" className="w-full h-full object-cover scale-110" />
                         </div>
-                        <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Uni Eats <span className="text-orange-600 font-bold text-lg">Ops</span></span>
+                        <div className="flex flex-col">
+                            <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">Uni-Eats</span>
+                            <span className="text-orange-600 font-black text-xs uppercase tracking-widest mt-1">Ops Center</span>
+                        </div>
                     </Link>
                 </div>
 

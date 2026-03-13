@@ -129,21 +129,21 @@ export default function Inventory() {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-1">
                 <div className="flex flex-col gap-1">
-                    <h1 className={styles.title} style={{ margin: 0 }}>Menu Ecosystem</h1>
+                    <h1 className={styles.title} style={{ margin: 0 }}>Menu Management</h1>
                     {!loading && (
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <span className="text-emerald-500">{availableCount} online</span>
+                            <span className="text-emerald-500">{availableCount} Available</span>
                             {' • '}
-                            <span className="text-rose-500">{unavailableCount} offline</span>
+                            <span className="text-rose-500">{unavailableCount} Unavailable</span>
                             {' • '}
-                            {items.length} Total Units
+                            {items.length} Total Items
                         </p>
                     )}
                 </div>
-                <div className="relative w-full md:w-auto">
+                <div className="relative w-full lg:w-auto">
                     <input
                         type="text"
-                        placeholder="Scan entries..."
+                        placeholder="Search menu items..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         className="w-full md:w-64 pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -175,26 +175,26 @@ export default function Inventory() {
                 </div>
             ) : (
                 <>
-                {/* Mobile Card View */}
-                <div className="grid grid-cols-1 gap-4 md:hidden mb-10">
+                {/* Mobile/Tablet Card View - Visible until lg breakpoint */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden mb-10">
                     {filteredItems.length === 0 ? (
-                        <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 italic">No Matching Units</div>
+                        <div className="col-span-full py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 italic">No Matching Items</div>
                     ) : (
                         filteredItems.map(item => (
-                            <div key={item.id} className={`bg-white dark:bg-zinc-900 p-5 rounded-[2rem] border border-slate-100 dark:border-zinc-800 transition-opacity duration-500 ${!item.available ? 'opacity-60 bg-slate-50 dark:bg-zinc-800/50' : ''}`}>
+                            <div key={item.id} className={`bg-white dark:bg-zinc-900 p-5 rounded-[2rem] border border-slate-100 dark:border-zinc-800 transition-all hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-black/50 ${!item.available ? 'opacity-60 grayscale-[0.5]' : ''}`}>
                                 <div className="flex gap-4 mb-4">
-                                    <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-zinc-800 overflow-hidden shadow-inner border border-white/20">
+                                    <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-zinc-800 overflow-hidden shadow-inner border border-white/20 flex-shrink-0">
                                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
-                                            <span className="text-[10px] font-black uppercase text-primary tracking-widest">{item.category}</span>
+                                            <span className="text-[10px] font-black uppercase text-primary tracking-widest truncate max-w-[80px]">{item.category}</span>
                                             <div className="flex gap-1 text-amber-400">
                                                 <span className="material-icons-round text-xs">star</span>
                                                 <span className="text-[10px] font-black">{item.rating}</span>
                                             </div>
                                         </div>
-                                        <h4 className="font-black text-slate-900 dark:text-white text-lg uppercase tracking-tighter truncate">{item.name}</h4>
+                                        <h4 className="font-black text-slate-900 dark:text-white text-base sm:text-lg uppercase tracking-tighter truncate leading-tight">{item.name}</h4>
                                         <p className="text-primary font-black text-sm">Rs. {item.price}</p>
                                     </div>
                                 </div>
@@ -208,7 +208,7 @@ export default function Inventory() {
                                             />
                                             <span className={styles.slider}></span>
                                         </label>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.available ? 'Online' : 'Offline'}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.available ? 'In Stock' : 'Out of Stock'}</span>
                                     </div>
                                     <button 
                                         onClick={() => openEdit(item)}
@@ -222,8 +222,8 @@ export default function Inventory() {
                     )}
                 </div>
 
-                {/* Desktop Table View */}
-                <div className={`${styles.tableWrapper} hidden md:block`}>
+                {/* Desktop Table View - Visible from lg breakpoint */}
+                <div className={`${styles.tableWrapper} hidden lg:block`}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
