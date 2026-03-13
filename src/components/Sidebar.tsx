@@ -14,7 +14,6 @@ import {
   Clock,
   CheckCircle2,
   TrendingUp,
-  History,
   Megaphone,
   UserCog
 } from 'lucide-react';
@@ -57,8 +56,7 @@ export default function Sidebar() {
             name: 'Order Management',
             icon: Package,
             subItems: [
-                { name: 'Live Orders', path: '/orders', icon: Clock },
-                { name: 'Order Logs', path: '/dashboard', icon: History },
+                { name: 'Live Orders', path: '/orders', icon: Clock }
             ]
         },
         {
@@ -77,9 +75,7 @@ export default function Sidebar() {
             name: 'System Intelligence',
             icon: CheckCircle2,
             subItems: [
-                { name: 'Standard FAQ', path: '/chat?message=Tell me about the Standard FAQ protocols.', icon: PlusCircle },
-                { name: 'Refund Terms', path: '/chat?message=What are the critical Refund Terms?', icon: PlusCircle },
-                { name: 'System Status', path: '/dashboard', icon: Clock },
+                { name: 'Standard FAQ', path: '/chat?message=Tell me about the Standard FAQ protocols.', icon: PlusCircle }
             ]
         }
     ];
