@@ -50,10 +50,14 @@ export default function Login() {
                 className={styles.card}
             >
                 <div className={styles.header}>
+                    <div className="w-20 h-20 rounded-3xl bg-primary mx-auto mb-6 flex items-center justify-center shadow-2xl shadow-primary/40 rotate-3 overflow-hidden border-4 border-white">
+                        <img src="/logo.png" alt="Uni Eats" className="w-full h-full object-cover scale-110" />
+                    </div>
                     <motion.h1
                         initial={{ scale: 0.9 }}
                         animate={{ scale: 1 }}
                         className={styles.title}
+                        style={{ fontStyle: 'normal' }}
                     >
                         Uni Eats
                     </motion.h1>

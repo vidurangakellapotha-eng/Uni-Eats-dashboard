@@ -90,10 +90,10 @@ export default function Sidebar() {
             {/* Mobile Header with Glassmorphism */}
             <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 flex items-center justify-between z-[100]">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
-                        <UtensilsCrossed size={18} />
+                    <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 rotate-1 overflow-hidden border border-white/20">
+                        <img src="/logo.png" alt="Uni Eats" className="w-full h-full object-cover scale-110" />
                     </div>
-                    <span className="font-black tracking-tighter uppercase italic text-sm">Uni Eats <span className="text-orange-600">Ops</span></span>
+                    <span className="font-black tracking-tighter uppercase text-sm">Uni Eats <span className="text-orange-600">Ops</span></span>
                 </div>
                 <button 
                     onClick={() => setIsOpen(!isOpen)} 
@@ -115,11 +115,11 @@ export default function Sidebar() {
             <aside className={`fixed top-0 left-0 h-screen w-72 bg-white border-r border-slate-100 flex flex-col z-[100] transition-transform duration-500 sm:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 {/* Brand */}
                 <div className="p-8">
-                    <Link to="/dashboard" className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-xl shadow-slate-900/20 rotate-3 hover:rotate-0 transition-transform duration-500">
-                            <UtensilsCrossed size={22} />
+                    <Link to="/dashboard" className="flex items-center gap-4 group">
+                        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/30 rotate-3 group-hover:rotate-0 transition-all duration-700 overflow-hidden border-2 border-slate-50">
+                            <img src="/logo.png" alt="Uni Eats" className="w-full h-full object-cover scale-110" />
                         </div>
-                        <span className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Uni Eats <span className="text-orange-600">Ops</span></span>
+                        <span className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Uni Eats <span className="text-orange-600 font-bold text-lg">Ops</span></span>
                     </Link>
                 </div>
 
