@@ -129,6 +129,7 @@ export default function Sidebar() {
                     <div className="space-y-1">
                         <Link
                             to="/dashboard"
+                            onClick={() => setIsOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${isActive('/dashboard') ? 'bg-slate-900 text-white font-black shadow-lg shadow-slate-900/20' : 'text-slate-500 hover:bg-slate-50 font-bold'}`}
                         >
                             <Home size={20} />
@@ -147,6 +148,7 @@ export default function Sidebar() {
                                     <Link
                                         key={subItem.path + subItem.name}
                                         to={subItem.path}
+                                        onClick={() => setIsOpen(false)}
                                         className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive(subItem.path) ? 'bg-orange-50 text-orange-600 font-black' : 'text-slate-500 hover:bg-slate-50 font-bold'}`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -167,8 +169,12 @@ export default function Sidebar() {
                 <div className="p-4 border-t border-slate-50">
                     <div className="bg-slate-50 rounded-[2rem] p-4 flex flex-col gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black uppercase text-sm">
-                                {initial}
+                            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black uppercase text-sm overflow-hidden border border-slate-200">
+                                {user.photoURL ? (
+                                    <img src={user.photoURL} alt={displayName} className="w-full h-full object-cover" />
+                                ) : (
+                                    initial
+                                )}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-black text-slate-900 truncate">{displayName}</p>

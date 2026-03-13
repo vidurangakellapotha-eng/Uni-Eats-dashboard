@@ -85,31 +85,23 @@ export default function Analytics() {
 
     return (
         <div className={styles.container}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 className={styles.title} style={{ margin: 0 }}>Revenue Tracking Dashboard</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-1">
+                <div className="flex flex-col gap-1">
+                    <h1 className={styles.title} style={{ margin: 0 }}>Revenue Insight Nexus</h1>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Integrated Financial Surveillance System</p>
+                </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', background: 'hsl(var(--secondary))', padding: '0.25rem', borderRadius: '0.75rem' }}>
+                <div className="flex bg-slate-100/80 dark:bg-zinc-900/50 p-1 rounded-2xl border border-slate-200/50">
                     {['Day', 'Week', 'Month', 'All'].map(filter => (
                         <button
                             key={filter}
                             onClick={() => setTimeFilter(filter)}
-                            style={{
-                                border: 'none',
-                                padding: '0.5rem 1.25rem',
-                                borderRadius: '0.5rem',
-                                fontSize: '0.875rem',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                background: timeFilter === filter ? 'hsl(var(--background))' : 'transparent',
-                                color: timeFilter === filter ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                boxShadow: timeFilter === filter ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
-                            }}
+                            className={`px-4 py-2 rounded-[14px] text-[10px] font-black uppercase tracking-widest transition-all ${
+                                timeFilter === filter 
+                                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200/50' 
+                                : 'text-slate-400 hover:text-slate-600'
+                            }`}
                         >
-                            <Calendar size={14} />
                             {filter}
                         </button>
                     ))}

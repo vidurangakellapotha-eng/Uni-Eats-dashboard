@@ -128,46 +128,42 @@ export default function Inventory() {
     return (
         <div className={styles.container}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                    <h1 className={styles.title} style={{ margin: 0 }}>Menu Management</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-1">
+                <div className="flex flex-col gap-1">
+                    <h1 className={styles.title} style={{ margin: 0 }}>Menu Ecosystem</h1>
                     {!loading && (
-                        <p style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))', marginTop: '0.25rem' }}>
-                            <span style={{ color: '#10B981', fontWeight: '600' }}>{availableCount} available</span>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <span className="text-emerald-500">{availableCount} online</span>
                             {' • '}
-                            <span style={{ color: 'hsl(var(--destructive))', fontWeight: '600' }}>{unavailableCount} unavailable</span>
+                            <span className="text-rose-500">{unavailableCount} offline</span>
                             {' • '}
-                            {items.length} total items
+                            {items.length} Total Units
                         </p>
                     )}
                 </div>
-                <input
-                    type="text"
-                    placeholder="Search menu items..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    style={{
-                        padding: '0.5rem 1rem', borderRadius: '0.75rem',
-                        border: '1px solid hsl(var(--border))', background: 'hsl(var(--background))',
-                        color: 'hsl(var(--foreground))', fontSize: '0.875rem', width: '220px', outline: 'none'
-                    }}
-                />
+                <div className="relative w-full md:w-auto">
+                    <input
+                        type="text"
+                        placeholder="Scan entries..."
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className="w-full md:w-64 pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                    <span className="material-icons-round absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm">search</span>
+                </div>
             </div>
 
             {/* Category Filters */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+            <div className="flex gap-2 mb-8 overflow-x-auto pb-4 -mx-1 px-1 hide-scrollbar">
                 {categories.map(cat => (
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        style={{
-                            borderRadius: '9999px', fontSize: '0.875rem', fontWeight: '600',
-                            padding: '0.5rem 1.25rem', whiteSpace: 'nowrap', border: '1px solid', cursor: 'pointer',
-                            borderColor: activeCategory === cat ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                            background: activeCategory === cat ? 'hsla(25, 95%, 45%, 0.1)' : 'hsl(var(--background))',
-                            color: activeCategory === cat ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                            transition: 'all 0.2s'
-                        }}
+                        className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                            activeCategory === cat 
+                            ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20' 
+                            : 'bg-white dark:bg-zinc-900 text-slate-400 border-slate-100 dark:border-zinc-800 hover:border-primary/20 hover:text-slate-600'
+                        }`}
                     >
                         {cat}
                     </button>
@@ -175,12 +171,60 @@ export default function Inventory() {
             </div>
 
             {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem', color: 'hsl(var(--muted-foreground))' }}>
-                    <div style={{ width: '24px', height: '24px', border: '2px solid hsl(var(--border))', borderTop: '2px solid hsl(var(--primary))', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                <div className="flex justify-center py-20">
+                    <div className="w-8 h-8 border-4 border-slate-100 border-t-primary rounded-full animate-spin" />
                 </div>
             ) : (
-                <div className={styles.tableWrapper}>
+                <>
+                {/* Mobile Card View */}
+                <div className="grid grid-cols-1 gap-4 md:hidden mb-10">
+                    {filteredItems.length === 0 ? (
+                        <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs bg-white rounded-3xl border border-slate-100 italic">No Matching Units</div>
+                    ) : (
+                        filteredItems.map(item => (
+                            <div key={item.id} className={`bg-white dark:bg-zinc-900 p-5 rounded-[2rem] border border-slate-100 transition-opacity duration-500 ${!item.available ? 'opacity-60 bg-slate-50' : ''}`}>
+                                <div className="flex gap-4 mb-4">
+                                    <div className="w-20 h-20 rounded-2xl bg-slate-100 overflow-hidden shadow-inner border border-white">
+                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start">
+                                            <span className="text-[10px] font-black uppercase text-primary tracking-widest">{item.category}</span>
+                                            <div className="flex gap-1 text-amber-400">
+                                                <span className="material-icons-round text-xs">star</span>
+                                                <span className="text-[10px] font-black">{item.rating}</span>
+                                            </div>
+                                        </div>
+                                        <h4 className="font-black text-slate-900 text-lg uppercase tracking-tighter truncate">{item.name}</h4>
+                                        <p className="text-primary font-black text-sm">Rs. {item.price}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                    <div className="flex items-center gap-3">
+                                        <label className={styles.toggle}>
+                                            <input
+                                                type="checkbox"
+                                                checked={item.available}
+                                                onChange={() => toggleAvailability(item.id, item.available)}
+                                            />
+                                            <span className={styles.slider}></span>
+                                        </label>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.available ? 'Online' : 'Offline'}</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => openEdit(item)}
+                                        className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-colors"
+                                    >
+                                        <Pencil size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className={`${styles.tableWrapper} hidden md:block`}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
@@ -277,6 +321,7 @@ export default function Inventory() {
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
 
             {/* Edit Modal */}

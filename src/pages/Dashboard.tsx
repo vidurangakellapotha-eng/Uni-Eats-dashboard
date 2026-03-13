@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Package, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -51,36 +52,43 @@ export default function Dashboard() {
     };
 
     return (
-        <div>
+        <div className="max-w-full overflow-hidden">
             <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}
+                className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
             >
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'hsl(var(--foreground))' }}>
-                    Dashboard Overview
-                </h1>
-                <span style={{ fontSize: '0.8rem', color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--secondary))', padding: '0.35rem 0.75rem', borderRadius: '9999px' }}>
-                    🔴 Live Data
-                </span>
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase">
+                        Ops <span className="text-orange-600">Nexus</span>
+                    </h1>
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">NIBM Campus Command Center</p>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-emerald-100/50">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Live Systems Active
+                </div>
             </motion.div>
 
-            <div className={styles.grid}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {stats.map((stat, index) => (
                     <motion.div
                         key={stat.title}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={styles.statCard}
+                        className={`${styles.statCard} group hover:border-primary/20 transition-all`}
                     >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span className={styles.statTitle}>{stat.title}</span>
-                            <stat.icon size={24} style={{ color: stat.color }} />
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-3 rounded-2xl bg-white shadow-sm border border-slate-50 group-hover:scale-110 transition-transform">
+                                <stat.icon size={20} style={{ color: stat.color }} />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Live</span>
                         </div>
-                        <span className={styles.statValue}>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{stat.title}</p>
+                        <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
                             {loading ? '—' : stat.value}
-                        </span>
+                        </h3>
                     </motion.div>
                 ))}
             </div>
@@ -89,53 +97,48 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className={styles.recentOrders}
-                style={{ marginTop: '2rem' }}
+                className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 border border-slate-100 border-b-4"
             >
-                <h2 className={styles.sectionTitle}>Live Active Orders</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Active Transmissions</h2>
+                    <Link to="/orders" className="text-[10px] font-black uppercase text-primary tracking-widest hover:translate-x-1 transition-transform flex items-center gap-2">
+                        View All Systems <span className="material-icons-round text-sm">arrow_forward</span>
+                    </Link>
+                </div>
+
                 {loading ? (
-                    <div style={{ padding: '2rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
-                        <div style={{ width: '24px', height: '24px', border: '2px solid hsl(var(--border))', borderTop: '2px solid hsl(var(--primary))', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
-                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    <div className="flex justify-center py-20">
+                        <div className="w-8 h-8 border-4 border-slate-100 border-t-primary rounded-full animate-spin" />
                     </div>
                 ) : recentOrders.length === 0 ? (
-                    <div style={{ padding: '2rem', textAlign: 'center', color: 'hsl(var(--muted-foreground))' }}>
-                        No active orders right now.
+                    <div className="py-20 text-center">
+                        <Package className="mx-auto mb-4 text-slate-200" size={48} />
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No Active Orders Detected</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="space-y-4">
                         {recentOrders.map((order) => {
                             const { bg, color } = getStatusColor(order.status);
                             const ts = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
                             return (
-                                <div key={order.id} style={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                    padding: '1rem', borderRadius: '0.5rem',
-                                    background: 'hsl(var(--secondary))', border: '1px solid hsl(var(--border))'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div style={{
-                                            width: '2.5rem', height: '2.5rem', borderRadius: '50%',
-                                            background: 'hsla(25, 95%, 45%, 0.1)', display: 'flex',
-                                            alignItems: 'center', justifyContent: 'center', color: 'hsl(25, 95%, 45%)'
-                                        }}>
-                                            <Package size={20} />
+                                <div key={order.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:border-primary/20 transition-all gap-4">
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary rotate-3">
+                                            <Package size={24} />
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: '500', color: 'hsl(var(--foreground))' }}>
-                                                #{order.id.slice(-6).toUpperCase()}
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <h4 className="font-black text-slate-900 text-lg uppercase tracking-tighter">#{order.id.slice(-6).toUpperCase()}</h4>
+                                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">• {order.userName}</span>
                                             </div>
-                                            <div style={{ fontSize: '0.875rem', color: 'hsl(var(--muted-foreground))' }}>
-                                                {(order.items || []).length} item(s) • Rs. {order.total?.toLocaleString() ?? '—'} • {ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em]">
+                                                {ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {Object.keys(order.items || {}).length} Items • Rs. {order.total?.toLocaleString()}
+                                            </p>
                                         </div>
                                     </div>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem', borderRadius: '9999px',
-                                        fontSize: '0.75rem', fontWeight: '600', background: bg, color
-                                    }}>
+                                    <div className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white shadow-sm`} style={{ background: bg, color }}>
                                         {order.status.replace('_', ' ')}
-                                    </span>
+                                    </div>
                                 </div>
                             );
                         })}
