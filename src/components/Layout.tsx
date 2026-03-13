@@ -84,8 +84,8 @@ export default function Layout() {
             {/* Core Application Layer */}
             <main className="md:pl-72 min-h-screen transition-all duration-500 ease-in-out">
                 {/* Internal Page Viewport */}
-                <div className="w-full h-full pt-16 md:pt-0">
-                    <div className="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                <div className="w-full h-full pt-20 md:pt-6 lg:pt-8">
+                    <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-12 pb-20 animate-in fade-in slide-in-from-bottom-2 duration-700">
                         <Outlet />
                     </div>
                 </div>

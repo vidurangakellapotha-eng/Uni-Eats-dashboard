@@ -70,6 +70,16 @@ export default function Sidebar() {
                 { name: 'Marketing', path: '/marketing', icon: Megaphone },
                 { name: 'Support Inbox', path: '/chat', icon: MessageSquare, hasBadge: unreadSupport > 0 },
             ]
+        },
+        {
+            id: 'intelligence',
+            name: 'System Intelligence',
+            icon: CheckCircle2,
+            subItems: [
+                { name: 'Standard FAQ', path: '/chat?message=Tell me about the Standard FAQ protocols.', icon: PlusCircle },
+                { name: 'Refund Terms', path: '/chat?message=What are the critical Refund Terms?', icon: PlusCircle },
+                { name: 'System Status', path: '/dashboard', icon: Clock },
+            ]
         }
     ];
 
@@ -128,15 +138,15 @@ export default function Sidebar() {
 
                 {/* Main Nav */}
                 <nav className="flex-1 px-4 overflow-y-auto space-y-8 py-4 custom-scrollbar">
-                    {/* Overview Static Link */}
+                    {/* Overview Nexus Link */}
                     <div className="space-y-1">
                         <Link
                             to="/dashboard"
                             onClick={() => setIsOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${isActive('/dashboard') ? 'bg-slate-900 text-white font-black shadow-lg shadow-slate-900/20' : 'text-slate-500 hover:bg-slate-50 font-bold'}`}
+                            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 ${isActive('/dashboard') ? 'bg-slate-900 text-white font-black shadow-xl shadow-slate-900/30 -rotate-1' : 'text-slate-500 hover:bg-slate-50 font-black'}`}
                         >
                             <Home size={20} />
-                            <span className="text-sm tracking-tight">Overview Nexus</span>
+                            <span className="text-sm tracking-tight">Ops Command</span>
                         </Link>
                     </div>
 
@@ -168,28 +178,33 @@ export default function Sidebar() {
                     ))}
                 </nav>
 
-                {/* User Footer */}
-                <div className="p-4 border-t border-slate-50">
-                    <div className="bg-slate-50 rounded-[2rem] p-4 flex flex-col gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black uppercase text-sm overflow-hidden border border-slate-200">
+                {/* User Footer with Profile fix */}
+                <div className="p-4 border-t border-slate-50 bg-white">
+                    <div className="bg-slate-900 rounded-[2.5rem] p-5 flex flex-col gap-5 shadow-2xl shadow-slate-300">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center font-black uppercase text-lg overflow-hidden border border-white/20 shadow-inner">
                                 {user.photoURL ? (
-                                    <img src={user.photoURL} alt={displayName} className="w-full h-full object-cover" />
+                                    <img 
+                                        src={user.photoURL} 
+                                        alt={displayName} 
+                                        className="w-full h-full object-cover" 
+                                        onError={(e) => (e.currentTarget.src = `https://ui-avatars.com/api/?name=${displayName}&background=f97316&color=fff`)}
+                                    />
                                 ) : (
-                                    initial
+                                    <span className="text-primary">{initial}</span>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-xs font-black text-slate-900 truncate">{displayName}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Admin Control</p>
+                                <p className="text-sm font-black text-white truncate leading-tight tracking-tight">{displayName}</p>
+                                <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">Authorized Admin</p>
                             </div>
                         </div>
                         <button 
                             onClick={handleLogout}
-                            className="w-full py-2.5 rounded-xl bg-white text-red-500 text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-md hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 rounded-2xl bg-white/5 hover:bg-white text-white hover:text-red-600 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all flex items-center justify-center gap-2 group"
                         >
-                            <LogOut size={14} />
-                            Log Out Portal
+                            <LogOut size={14} className="group-hover:translate-x-1 transition-transform" />
+                            Security Sign Out
                         </button>
                     </div>
                 </div>

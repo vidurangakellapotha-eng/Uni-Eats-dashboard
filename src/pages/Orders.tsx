@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, Wifi, WifiOff, User } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, User } from 'lucide-react';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { pushNotification } from '../notificationUtils';
@@ -167,15 +167,20 @@ export default function Orders() {
     return (
         <div className={styles.container}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-1">
-                <div className="flex flex-col gap-1">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <h1 className={styles.title} style={{ margin: 0 }}>Order Management</h1>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: connected ? '#10B981' : '#EF4444', fontWeight: '600' }}>
-                            {connected ? <Wifi size={14} /> : <WifiOff size={14} />}
-                            {connected ? 'Live' : 'Offline'}
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Order <span className="text-orange-600">Terminal</span></h1>
+                        <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-slate-200/50 shadow-sm">
+                            <span className={`relative flex h-2 w-2 ${connected ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${connected ? 'bg-emerald-400' : 'bg-rose-400'} opacity-75`}></span>
+                                <span className={`relative inline-flex rounded-full h-2 w-2 ${connected ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                            </span>
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${connected ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                {connected ? 'Live Sync' : 'Offline'}
+                            </span>
                         </div>
                     </div>
-                    <p className="text-xs text-slate-500 font-medium">Manage and track student meal requests in real-time.</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Real-time student logistics oversight</p>
                 </div>
                 
                 <div className="flex bg-slate-100/80 dark:bg-zinc-900/50 p-1 rounded-2xl border border-slate-200/50 w-full md:w-auto">

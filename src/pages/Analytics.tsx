@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
 import styles from './Analytics.module.css';
 import { ArrowUpRight, TrendingUp, DollarSign, Activity, Wallet, CreditCard, Banknote } from 'lucide-react';
@@ -48,15 +48,15 @@ export default function Analytics() {
     }, []);
 
     // Aggregations
-    const completedOrders = orders.filter(o => o.status === 'COMPLETED');
-    const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const completedOrders = orders.filter((o: Order) => o.status === 'COMPLETED');
+    const totalRevenue = completedOrders.reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
     const totalOrdersCount = orders.length;
     const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalRevenue / completedOrders.length || 0) : 0;
 
     // Payment method breakdown
-    const cashRev = completedOrders.filter(o => o.paymentMethod === 'Cash at Counter').reduce((sum, o) => sum + (o.total || 0), 0);
-    const cardRev = completedOrders.filter(o => o.paymentMethod === 'Credit/Debit Card').reduce((sum, o) => sum + (o.total || 0), 0);
-    const creditRev = completedOrders.filter(o => o.paymentMethod === 'Campus Credits').reduce((sum, o) => sum + (o.total || 0), 0);
+    const cashRev = completedOrders.filter((o: Order) => o.paymentMethod === 'Cash at Counter').reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
+    const cardRev = completedOrders.filter((o: Order) => o.paymentMethod === 'Credit/Debit Card').reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
+    const creditRev = completedOrders.filter((o: Order) => o.paymentMethod === 'Campus Credits').reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
 
     const paymentMethodData = [
         { name: 'Cash', value: cashRev },
@@ -85,9 +85,11 @@ export default function Analytics() {
 
     return (
         <div className={styles.container}>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 px-1">
-                <div className="flex flex-col gap-1">
-                    <h1 className={styles.title} style={{ margin: 0 }}>Revenue Insight Nexus</h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 px-1">
+                <div className="flex flex-col gap-1.5">
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+                        Revenue <span className="text-emerald-600">Nexus</span>
+                    </h1>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Integrated Financial Surveillance System</p>
                 </div>
 
@@ -146,55 +148,56 @@ export default function Analytics() {
             </div>
 
             {/* Revenue Breakdown by Payment Method */}
-            <div className={styles.grid} style={{ marginBottom: '2rem' }}>
-                <div className={styles.card} style={{ flex: 1.5 }}>
-                    <h2 className={styles.cardTitle}>Revenue by Payment Method</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
-                        <div style={{ padding: '1.5rem', background: 'hsl(var(--secondary))', borderRadius: '1rem', border: '1px solid hsl(var(--border))' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                <Banknote size={20} style={{ color: '#10B981' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Cash</span>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+                <div className={`${styles.card} xl:col-span-2`}>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6">Revenue Streams</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="p-6 bg-emerald-50/50 rounded-2xl border border-emerald-100 flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-emerald-600">
+                                <Banknote size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Cash</span>
                             </div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Rs. {cashRev.toLocaleString()}</div>
+                            <div className="text-2xl font-black text-slate-900 leading-none">Rs. {cashRev.toLocaleString()}</div>
                         </div>
-                        <div style={{ padding: '1.5rem', background: 'hsl(var(--secondary))', borderRadius: '1rem', border: '1px solid hsl(var(--border))' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                <CreditCard size={20} style={{ color: '#3B82F6' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Card</span>
+                        <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100 flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-blue-600">
+                                <CreditCard size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Card</span>
                             </div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Rs. {cardRev.toLocaleString()}</div>
+                            <div className="text-2xl font-black text-slate-900 leading-none">Rs. {cardRev.toLocaleString()}</div>
                         </div>
-                        <div style={{ padding: '1.5rem', background: 'hsl(var(--secondary))', borderRadius: '1rem', border: '1px solid hsl(var(--border))' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                <Wallet size={20} style={{ color: '#F59E0B' }} />
-                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'hsl(var(--muted-foreground))' }}>Campus Credit</span>
+                        <div className="p-6 bg-amber-50/50 rounded-2xl border border-amber-100 flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-amber-600">
+                                <Wallet size={16} />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Credits</span>
                             </div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Rs. {creditRev.toLocaleString()}</div>
+                            <div className="text-2xl font-black text-slate-900 leading-none">Rs. {creditRev.toLocaleString()}</div>
                         </div>
                     </div>
                 </div>
                 
-                <div className={styles.card} style={{ flex: 1 }}>
-                    <h2 className={styles.cardTitle}>Payment Distribution</h2>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                            <Pie
-                                data={paymentMethodData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                            >
-                                {paymentMethodData.map((_, index) => (
-                                    <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip formatter={(value: any) => `Rs. ${(value || 0).toLocaleString()}`} />
-                            <Legend />
-                        </PieChart>
-                    </ResponsiveContainer>
+                <div className={styles.card}>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6">Distribution Matrix</h2>
+                    <div className="h-[200px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={paymentMethodData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={50}
+                                    outerRadius={70}
+                                    paddingAngle={8}
+                                    dataKey="value"
+                                >
+                                    {paymentMethodData.map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value: any) => `Rs. ${(value || 0).toLocaleString()}`} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
             </div>
 

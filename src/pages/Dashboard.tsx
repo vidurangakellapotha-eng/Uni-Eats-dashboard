@@ -56,39 +56,47 @@ export default function Dashboard() {
             <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4"
+                className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6"
             >
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase">
+                <div className="flex flex-col gap-1.5">
+                    <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                         Ops <span className="text-orange-600">Nexus</span>
                     </h1>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">NIBM Campus Command Center</p>
+                    <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                        <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">NIBM Campus Center</p>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-emerald-100/50">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <div className="flex items-center gap-3 bg-white/50 backdrop-blur-sm px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-slate-200/50 shadow-sm">
+                    <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
                     Live Systems Active
                 </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {stats.map((stat, index) => (
                     <motion.div
                         key={stat.title}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`${styles.statCard} group hover:border-primary/20 transition-all`}
+                        className={`${styles.statCard} group`}
                     >
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 rounded-2xl bg-white shadow-sm border border-slate-50 group-hover:scale-110 transition-transform">
-                                <stat.icon size={20} style={{ color: stat.color }} />
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-white shadow-md border border-slate-100 flex items-center justify-center group-hover:rotate-6 transition-transform duration-500">
+                                <stat.icon size={22} style={{ color: stat.color }} />
                             </div>
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Live</span>
+                            <div className="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[8px] font-black text-slate-400 uppercase tracking-widest">Global</div>
                         </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{stat.title}</p>
-                        <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
-                            {loading ? '—' : stat.value}
-                        </h3>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">{stat.title}</p>
+                            <h3 className="text-4xl font-black text-slate-900 tracking-tighter">
+                                {loading ? '—' : stat.value}
+                            </h3>
+                        </div>
                     </motion.div>
                 ))}
             </div>
@@ -97,46 +105,61 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-6 md:p-10 border border-slate-100 border-b-4"
+                className={`${styles.recentOrders}`}
             >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Active Transmissions</h2>
-                    <Link to="/orders" className="text-[10px] font-black uppercase text-primary tracking-widest hover:translate-x-1 transition-transform flex items-center gap-2">
-                        View All Systems <span className="material-icons-round text-sm">arrow_forward</span>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Active Transmissions</h2>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Real-time order synchronization</p>
+                    </div>
+                    <Link to="/orders" className="w-full md:w-auto px-6 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-orange-600 transition-all text-center shadow-lg shadow-slate-900/10">
+                        Access Logistics Terminal
                     </Link>
                 </div>
 
                 {loading ? (
                     <div className="flex justify-center py-20">
-                        <div className="w-8 h-8 border-4 border-slate-100 border-t-primary rounded-full animate-spin" />
+                        <div className="w-10 h-10 border-4 border-slate-100 border-t-primary rounded-full animate-spin" />
                     </div>
                 ) : recentOrders.length === 0 ? (
-                    <div className="py-20 text-center">
-                        <Package className="mx-auto mb-4 text-slate-200" size={48} />
-                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No Active Orders Detected</p>
+                    <div className="py-24 text-center bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-100">
+                        <Package className="mx-auto mb-6 text-slate-200" size={64} strokeWidth={1} />
+                        <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">No Active Transmissions</p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
                         {recentOrders.map((order) => {
                             const { bg, color } = getStatusColor(order.status);
                             const ts = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
                             return (
-                                <div key={order.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:border-primary/20 transition-all gap-4">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary rotate-3">
-                                            <Package size={24} />
+                                <div key={order.id} className="group flex flex-col md:flex-row items-start md:items-center justify-between p-6 rounded-[2rem] bg-white border border-slate-100 hover:border-orange-200 transition-all gap-5 hover:shadow-xl hover:shadow-slate-100/50">
+                                    <div className="flex items-center gap-6 w-full md:w-auto">
+                                        <div className="w-16 h-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors group-hover:scale-105 duration-500">
+                                            <Package size={28} />
                                         </div>
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <h4 className="font-black text-slate-900 text-lg uppercase tracking-tighter">#{order.id.slice(-6).toUpperCase()}</h4>
-                                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">• {order.userName}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 mb-1.5">
+                                                <h4 className="font-black text-slate-900 text-xl uppercase tracking-tighter">#{order.id.slice(-6).toUpperCase()}</h4>
+                                                <div className="h-1 w-1 rounded-full bg-slate-300"></div>
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{order.userName}</span>
                                             </div>
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.15em]">
-                                                {ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {Object.keys(order.items || {}).length} Items • Rs. {order.total?.toLocaleString()}
-                                            </p>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                                    <Clock size={12} />
+                                                    {ts.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                                <div className="h-1 w-1 rounded-full bg-slate-200"></div>
+                                                <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                                                    {Object.keys(order.items || {}).length} Units
+                                                </div>
+                                                <div className="h-1 w-1 rounded-full bg-slate-200"></div>
+                                                <div className="text-[10px] text-primary font-black uppercase tracking-widest">
+                                                    LKR {order.total?.toLocaleString()}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white shadow-sm`} style={{ background: bg, color }}>
+                                    <div className={`w-full md:w-auto px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white shadow-sm text-center`} style={{ background: bg, color }}>
                                         {order.status.replace('_', ' ')}
                                     </div>
                                 </div>
