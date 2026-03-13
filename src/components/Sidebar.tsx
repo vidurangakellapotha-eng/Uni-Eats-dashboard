@@ -49,8 +49,7 @@ export default function Sidebar() {
             name: 'Menu & Inventory',
             icon: UtensilsCrossed,
             subItems: [
-                { name: 'Stock Availability', path: '/availability', icon: CheckCircle2 },
-                { name: 'Categories', path: '/availability', icon: PlusCircle },
+                { name: 'Stock Availability', path: '/availability', icon: CheckCircle2 }
             ]
         },
         {
