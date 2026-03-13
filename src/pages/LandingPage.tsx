@@ -183,7 +183,3 @@ export default function LandingPage() {
     );
 }
 
-// Simple Helper for the preview
-function CheckCircle2({ size, className }: { size?: number, className?: string }) {
-    return <Zap size={size} className={className} />
-}
