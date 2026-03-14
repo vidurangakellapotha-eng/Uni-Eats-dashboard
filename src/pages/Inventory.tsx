@@ -333,12 +333,12 @@ export default function Inventory() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-[1001]"
+                            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-[1001] max-h-[90vh] flex flex-col"
                         >
-                            <div className="p-6 sm:p-8">
+                            <div className="p-6 sm:p-8 overflow-y-auto overflow-x-hidden border-b border-transparent">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-bold dark:text-white">Edit Item</h2>
-                                    <button onClick={closeEdit} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
+                                    <button onClick={closeEdit} className="p-2 hover:bg-slate-100 dark:bg-zinc-800 rounded-full transition-colors flex-shrink-0">
                                         <X size={20} className="text-slate-500" />
                                     </button>
                                 </div>
@@ -381,7 +381,7 @@ export default function Inventory() {
                                         <textarea value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} rows={3} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-primary/20 dark:text-white resize-none" />
                                     </div>
                                 </div>
-                                <div className="mt-8 flex gap-3">
+                                <div className="mt-8 flex gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800">
                                     <button onClick={closeEdit} className="flex-1 px-6 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 transition-colors">Cancel</button>
                                     <button onClick={handleSave} disabled={saving || uploadingImage} className={`flex-1 px-6 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${saveSuccess ? 'bg-emerald-500' : 'bg-primary'}`}>
                                         {saveSuccess ? <>✓ Saved</> : (saving || uploadingImage) ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving</> : <>Save Changes</>}
