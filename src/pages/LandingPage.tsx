@@ -21,9 +21,6 @@ export default function LandingPage() {
                     <span className="text-xl font-black tracking-tighter uppercase italic">Uni Eats <span className="text-orange-600">Ops</span></span>
                 </div>
                 <div className="hidden md:flex items-center gap-8">
-                    <a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Features</a>
-                    <a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Infrastructure</a>
-                    <a href="#" className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Security</a>
                     <button onClick={() => navigate('/login')} className="px-6 py-2.5 rounded-full bg-slate-900 text-white text-sm font-black hover:bg-slate-800 transition-all shadow-lg active:scale-95">
                         Admin Login
                     </button>
