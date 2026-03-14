@@ -66,9 +66,6 @@ export default function LandingPage() {
                             Enter Portal 
                             <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
                         </button>
-                        <button className="px-8 md:px-10 py-4 md:py-5 rounded-3xl bg-white text-slate-900 border-2 border-slate-100 font-black text-lg md:text-xl hover:bg-slate-50 active:scale-95 transition-all w-full sm:w-auto">
-                            System Health
-                        </button>
                     </div>
                 </motion.div>
 
