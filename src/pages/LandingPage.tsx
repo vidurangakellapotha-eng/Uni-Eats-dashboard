@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChefHat, BarChart3, Clock, Zap, ShieldCheck, ArrowRight, Layers, MousePointer2 } from 'lucide-react';
+import { BarChart3, Clock, Zap, ShieldCheck, ArrowRight, Layers, MousePointer2 } from 'lucide-react';
 import Typewriter from '../components/Typewriter';
 
 export default function LandingPage() {
@@ -14,11 +14,11 @@ export default function LandingPage() {
 
             {/* Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 flex justify-between items-center backdrop-blur-md border-b border-slate-100/50">
-                <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-xl">
-                        <ChefHat size={24} />
+                <div className="flex items-center gap-3 group cursor-default">
+                    <div className="w-10 h-10 rounded-2xl bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/20 overflow-hidden border border-white/20 group-hover:scale-105 transition-all outline-none">
+                        <img src="/logo.png" alt="Uni-Eats" className="w-full h-full object-cover scale-110" />
                     </div>
-                    <span className="text-xl font-black tracking-tighter uppercase italic">Uni Eats <span className="text-orange-600">Ops</span></span>
+                    <span className="text-xl font-black tracking-tighter uppercase leading-none">Uni-Eats <span className="text-orange-600 pl-0.5 relative -top-[1px]">Ops</span></span>
                 </div>
                 <div className="hidden md:flex items-center gap-8">
                     <button onClick={() => navigate('/login')} className="px-6 py-2.5 rounded-full bg-slate-900 text-white text-sm font-black hover:bg-slate-800 transition-all shadow-lg active:scale-95">
