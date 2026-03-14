@@ -23,6 +23,7 @@ interface Order {
     total: number;
     status: 'PLACED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'REJECTED';
     paymentMethod: string;
+    notes?: string;
     timestamp: string;
     createdAt: any; // Firestore serverTimestamp
 }
@@ -269,6 +270,18 @@ export default function Orders() {
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* Display Order Notes if present */}
+                                    {order.notes && order.notes.trim().length > 0 && (
+                                        <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'hsla(35, 100%, 50%, 0.1)', borderRadius: '0.5rem', border: '1px solid hsla(35, 100%, 50%, 0.2)' }}>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: 'hsl(var(--primary))', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                Notes
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', color: 'hsl(var(--foreground))', fontStyle: 'italic', lineHeight: '1.4' }}>
+                                                "{order.notes}"
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className={styles.actions} style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem' }}>
                                         {order.status === 'PLACED' && (
