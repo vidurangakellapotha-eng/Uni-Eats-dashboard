@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import styles from './Login.module.css';
 
 export default function Login() {
@@ -48,7 +48,17 @@ export default function Login() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className={styles.card}
+                style={{ position: 'relative' }}
             >
+                <button 
+                    onClick={() => navigate('/')}
+                    className="absolute top-4 left-4 sm:top-6 sm:left-6 p-2 md:px-3 md:py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-all active:scale-95 z-50 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest border border-slate-100 dark:border-zinc-700 shadow-sm md:shadow-none hover:shadow-md"
+                    title="Return to Welcome Page"
+                >
+                    <ArrowLeft size={16} />
+                    <span className="hidden md:inline">Back</span>
+                </button>
+
                 <div className={styles.header}>
                     <div className="w-20 h-20 rounded-3xl bg-primary mx-auto mb-6 flex items-center justify-center shadow-2xl shadow-primary/40 rotate-3 overflow-hidden border-4 border-white">
                         <img src="/logo.png" alt="Uni Eats" className="w-full h-full object-cover scale-110" />
