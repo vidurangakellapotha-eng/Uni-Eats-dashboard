@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, where, writeBatch, doc } from 'firebase/firestore';
 import { Send, Search, MessageSquare, ArrowLeft } from 'lucide-react';
@@ -30,16 +29,6 @@ const Chat: React.FC = () => {
     const [inputText, setInputText] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
-    const location = useLocation();
-
-    // Auto-fill input from query params (FAQ feature)
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const msg = params.get('message');
-        if (msg) {
-            setInputText(msg);
-        }
-    }, [location.search]);
 
     // Fetch all message headers to group into sessions
     useEffect(() => {

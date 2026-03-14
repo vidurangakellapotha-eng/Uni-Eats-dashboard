@@ -10,7 +10,6 @@ import {
   Menu, 
   X,
   Settings,
-  PlusCircle,
   Clock,
   CheckCircle2,
   TrendingUp,
@@ -68,14 +67,6 @@ export default function Sidebar() {
                 { name: 'Analytics', path: '/analytics', icon: TrendingUp },
                 { name: 'Marketing', path: '/marketing', icon: Megaphone },
                 { name: 'Support Inbox', path: '/chat', icon: MessageSquare, hasBadge: unreadSupport > 0 },
-            ]
-        },
-        {
-            id: 'intelligence',
-            name: 'System Intelligence',
-            icon: CheckCircle2,
-            subItems: [
-                { name: 'Standard FAQ', path: '/chat?message=Tell me about the Standard FAQ protocols.', icon: PlusCircle }
             ]
         }
     ];
