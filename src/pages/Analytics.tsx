@@ -47,11 +47,31 @@ export default function Analytics() {
         return () => unsubscribe();
     }, []);
 
-    // Aggregations
-    const completedOrders = orders.filter((o: Order) => o.status === 'COMPLETED');
+    // Filter logic based on timeFilter
+    const now = new Date();
+    const currentMillis = now.getTime();
+    
+    let timeThreshold = 0;
+    if (timeFilter === 'Day') {
+        timeThreshold = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    } else if (timeFilter === 'Week') {
+        const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        timeThreshold = new Date(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate()).getTime();
+    } else if (timeFilter === 'Month') {
+        timeThreshold = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    }
+
+    const filteredOrders = orders.filter((o: Order) => {
+        if (timeFilter === 'All') return true;
+        const orderTime = o.createdAt?.toMillis ? o.createdAt.toMillis() : (o.createdAt?.seconds ? o.createdAt.seconds * 1000 : 0);
+        return orderTime >= timeThreshold && orderTime <= currentMillis;
+    });
+
+    // Aggregations based on filtered orders
+    const completedOrders = filteredOrders.filter((o: Order) => o.status === 'COMPLETED');
     const totalRevenue = completedOrders.reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
-    const totalOrdersCount = orders.length;
-    const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalRevenue / completedOrders.length || 0) : 0;
+    const totalOrdersCount = filteredOrders.length;
+    const avgOrderValue = completedOrders.length > 0 ? Math.round(totalRevenue / completedOrders.length) : 0;
 
     // Payment method breakdown
     const cashRev = completedOrders.filter((o: Order) => o.paymentMethod === 'Cash at Counter').reduce((sum: number, o: Order) => sum + (o.total || 0), 0);
