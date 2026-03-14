@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, User } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, PackageCheck, CookingPot, Trash2, User, Star, MessageSquare } from 'lucide-react';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { pushNotification } from '../notificationUtils';
@@ -32,6 +32,7 @@ export default function Orders() {
     const [activeTab, setActiveTab] = useState('Active');
     const [activeFilter, setActiveFilter] = useState('All Orders');
     const [orders, setOrders] = useState<Order[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [connected, setConnected] = useState(true);
 
@@ -57,6 +58,18 @@ export default function Orders() {
             }
         );
 
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const qRev = query(collection(db, 'reviews'));
+        const unsubscribe = onSnapshot(qRev, (snapshot) => {
+            const fetchedReviews = snapshot.docs.map(docSnap => ({
+                id: docSnap.id,
+                ...docSnap.data()
+            }));
+            setReviews(fetchedReviews);
+        });
         return () => unsubscribe();
     }, []);
 
@@ -280,6 +293,26 @@ export default function Orders() {
                                             <div style={{ fontSize: '0.8rem', color: 'hsl(var(--foreground))', fontStyle: 'italic', lineHeight: '1.4' }}>
                                                 "{order.notes}"
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {/* Display Order Review if present */}
+                                    {reviews.find(r => r.orderId === order.id) && (
+                                        <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: 'hsla(160, 100%, 50%, 0.1)', borderRadius: '0.5rem', border: '1px solid hsla(160, 100%, 50%, 0.2)' }}>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                <Star size={11} fill="#10B981" /> Customer Rating 
+                                                {(() => {
+                                                    const r = reviews.find(rev => rev.orderId === order.id);
+                                                    const avg = r.ratings && Object.values(r.ratings).length ? (Object.values<number>(r.ratings).reduce((a:number,b:number)=>a+b,0)/Object.values(r.ratings).length).toFixed(1) : '5.0';
+                                                    return ` ${avg}/5.0`;
+                                                })()}
+                                            </div>
+                                            {reviews.find(r => r.orderId === order.id)?.comment && (
+                                                <div style={{ fontSize: '0.8rem', color: 'hsl(var(--foreground))', fontStyle: 'italic', lineHeight: '1.4', marginTop: '0.25rem', display: 'flex', gap: '0.25rem', alignItems: 'flex-start' }}>
+                                                    <MessageSquare size={12} style={{ marginTop: '0.1rem', flexShrink: 0, opacity: 0.5 }} />
+                                                    "{reviews.find(r => r.orderId === order.id)?.comment}"
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
