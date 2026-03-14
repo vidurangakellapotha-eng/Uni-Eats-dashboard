@@ -17,7 +17,14 @@ export default function Dashboard() {
             const pending = all.filter(o => o.status === 'PLACED').length;
             const preparing = all.filter(o => o.status === 'PREPARING').length;
             const ready = all.filter(o => o.status === 'READY').length;
-            const total = all.length;
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            
+            const total = all.filter(o => {
+                const orderTime = o.createdAt?.toMillis ? o.createdAt.toMillis() : (o.createdAt?.seconds ? o.createdAt.seconds * 1000 : 0);
+                return orderTime >= startOfDay;
+            }).length;
+
             setCounts({ pending, preparing, ready, total });
             // Recent 3 active orders sorted by timestamp descending
             const recent = all
